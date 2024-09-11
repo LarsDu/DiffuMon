@@ -39,3 +39,17 @@ $ diffumon sample --help
 ### Notebook
 
 Also included is a notebook that demonstrates the usage of the model under notebooks/diffumon.ipynb
+
+## Developer notes
+
+`black` and `ruff` should come as preinstalled packages in the virtual enviornment.
+
+Format code
+```
+    black .
+```
+
+Check linting
+```
+    ruff check .
+```
