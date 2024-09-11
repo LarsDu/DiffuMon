@@ -1,0 +1,39 @@
+[project]
+name = "diffumon"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "Larry Du", email = "larrydu88@gmail.com" }
+]
+dependencies = [
+    "torch>=2.4.1",
+    "numpy>=2.1.1",
+    "pillow>=10.4.0",
+    "torchvision>=0.19.1",
+    "pandas>=2.2.2",
+    "click>=8.1.7",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "black>=24.8.0",
+    "ruff>=0.6.4",
+    "matplotlib>=3.9.2",
+    "jupyterlab>=4.2.5",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/diffumon"]
+
+[project.scripts]
+diffumon = 'diffumon.cli:main'
