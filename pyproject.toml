@@ -30,6 +30,7 @@ dev-dependencies = [
     "matplotlib>=3.9.2",
     "jupyterlab>=4.2.5",
     "isort>=5.13.2",
+    "pre-commit>=3.8.0",
 ]
 
 [tool.hatch.metadata]

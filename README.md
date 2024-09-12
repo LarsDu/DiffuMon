@@ -4,10 +4,10 @@ Basic Denoising Diffusion Probabilistic Model image generator implemented in PyT
 
 ## Getting started
 
-#### Setting up environment
-This repo uses [`rye`](https://rye.astral.sh/guide/installation/) as the package/enviornment manager
+### Setting up environment
+This repo uses [`rye`](https://rye.astral.sh/guide/installation/) as the package/environment manager
 
-The following command will install packages and setup a virtual enviornment
+The following command will install packages and setup a virtual environment
 ```
 # Install packages
 $ rye sync
@@ -42,14 +42,10 @@ Also included is a notebook that demonstrates the usage of the model under noteb
 
 ## Developer notes
 
-`black` and `ruff` should come as preinstalled packages in the virtual enviornment.
+`black`, `ruff`, `isort`, and `pre-commit` should come as preinstalled dev developer packages in the virtual enviornment.
 
-Format code
-```
-    black .
-```
+It's strongly recommended to install pre-commit hooks to ensure code consistency and quality.
 
-Check linting
 ```
-    ruff check .
+$ pre-commit install
 ```
