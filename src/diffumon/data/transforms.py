@@ -1,7 +1,6 @@
-from typing import Sequence
+from typing import Callable, Sequence
 
 import numpy as np
-from torch import Tensor
 from torchvision.transforms import (
     CenterCrop,
     ColorJitter,
@@ -14,7 +13,7 @@ from torchvision.transforms import (
 )
 
 
-def forward_transform(x: Tensor, resize_dims: Sequence[int]) -> Tensor:
+def forward_transform(resize_dims: Sequence[int]) -> Callable:
     """Resize image and convert to tensor"""
     return Compose(
         [
@@ -26,7 +25,7 @@ def forward_transform(x: Tensor, resize_dims: Sequence[int]) -> Tensor:
     )
 
 
-def forward_transform_augmented_v1(x: Tensor, resize_dims: Sequence[int]) -> Tensor:
+def forward_transform_augmented_v1(resize_dims: Sequence[int]) -> Callable:
     """Resize image and convert to tensor with some data augmentations for training"""
     return Compose(
         [
@@ -42,7 +41,7 @@ def forward_transform_augmented_v1(x: Tensor, resize_dims: Sequence[int]) -> Ten
     )
 
 
-def reverse_transform() -> Tensor:
+def reverse_transform() -> Callable:
     """Convert tensor to a numpy image"""
     return Compose(
         [

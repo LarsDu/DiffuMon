@@ -1,39 +1,44 @@
 # DiffuMon
+
 Basic Denoising Diffusion Probabilistic Model image generator implemented in PyTorch
 
 
 ## Getting started
 
 ### Setting up environment
+
 This repo uses [`rye`](https://rye.astral.sh/guide/installation/) as the package/environment manager
 
 The following command will install packages and setup a virtual environment
-```
+
+```bash
 # Install packages
-$ rye sync
+rye sync
 
 # Activate virtual enviornment
-$ . .venv/bin/activate
+. .venv/bin/activate
 ```
 
 
 ### Access the entrypoint
 
 Once installed, the model can be trained and used via the `diffumon` command
-```
-$ diffumon --help
+
+```bash
+diffumon --help
 ```
 
 ### Train a model
 
-```
-$ diffumon train --help
+
+```bash
+diffumon train --help
 ```
 
 ### Generate samples
 
-```
-$ diffumon sample --help
+```bash
+diffumon sample --help
 ```
 
 ### Notebook
@@ -44,8 +49,8 @@ Also included is a notebook that demonstrates the usage of the model under noteb
 
 `black`, `ruff`, `isort`, and `pre-commit` should come as preinstalled dev developer packages in the virtual environment.
 
-It's strongly recommended to install pre-commit hooks to ensure code consistency and quality.
+It's strongly recommended to install pre-commit hooks to ensure code consistency and quality which will automatically run formatters (but not linters) before each commit.
 
-```
-$ pre-commit install
+```bash
+pre-commit install
 ```

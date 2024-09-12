@@ -209,6 +209,12 @@ def download_pokemon_sprites(
     train_dir = output_dir / "train"
     test_dir = output_dir / "test"
 
+    # Short circuit if these directories already exist
+    if train_dir.exists() and test_dir.exists():
+        print(f"Found existing train and test directories in {output_dir}")
+        print("Skipping download and unpacking...")
+        return train_dir, test_dir
+
     # Create the 'train' and 'test' directories
     os.makedirs(train_dir, exist_ok=True)
     os.makedirs(test_dir, exist_ok=True)
@@ -268,6 +274,12 @@ def download_mnist(
     # Create train and test directories
     train_dir = output_dir / "train"
     test_dir = output_dir / "test"
+
+    # Short circuit if these directories already exist
+    if train_dir.exists() and test_dir.exists():
+        print(f"Found existing train and test directories in {output_dir}")
+        print("Skipping download and unpacking...")
+        return train_dir, test_dir
 
     # Create the 'train' and 'test' directories
     os.makedirs(train_dir, exist_ok=True)

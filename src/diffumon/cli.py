@@ -2,9 +2,10 @@ from pathlib import Path
 
 import click
 
-# from diffumon.diffusion.sampler import p_sampler
-# from diffumon.trainers.train import train_ddpm
 from diffumon.data.downloader import download_mnist, download_pokemon
+
+# from diffumon.diffusion.sampler import p_sampler
+from diffumon.trainers.ddpm_entrypoint import train_ddpm_entrypoint
 
 
 # Setup the CLI
@@ -17,6 +18,12 @@ def main():
 
 
 @main.command(help="Train the diffumon denoising diffusion model")
+@click.option(
+    "--preloaded-data",
+    type=str,
+    default=None,
+    help="(Optional) alternate to data-dir, select a preloaded dataset which will be downloaded automatically. Can choose from ['pokemon', 'mnist']. Will override num_channels accoring to the dataset",
+)
 @click.option(
     "--num-epochs",
     default=20,
@@ -33,7 +40,7 @@ def main():
     "--data-dir",
     default=None,
     type=str,
-    help='Directory containing target images for training. Must contain "train" and "test" subdirectories',
+    help='(Optional) Manually specify directory containing target images for train/test. Must contain "train" and "test" subdirectories.',
 )
 @click.option(
     "--checkpoint-path",
@@ -42,10 +49,22 @@ def main():
     help="Path to save the trained model",
 )
 @click.option(
-    "--preloaded-data",
-    type=str,
-    default=None,
-    help="(Optional) alternate to data-dir, select a preloaded dataset which will be downloaded automatically. Can choose from ['pokemon', 'mnist']",
+    "--num-timesteps",
+    default=1000,
+    type=int,
+    help="Number of timesteps in the diffusion process",
+)
+@click.option(
+    "img_dim",
+    type=int,
+    default=28,
+    help="Resize images to this height and width",
+)
+@click.option(
+    "--num-channels",
+    default=3,
+    type=int,
+    help="Number of channels in the images",
 )
 @click.option(
     "--seed",
@@ -53,39 +72,52 @@ def main():
     type=int,
     help="Random seed for training the model",
 )
-@click.option(
-    "side",
-    type=int,
-    default=28,
-    help="Size of the image height and width",
-)
 def train(
+    preloaded_data: str | None,
     num_epochs: int,
     batch_size: int,
     data_dir: str | None,
     checkpoint_path: str,
-    preloaded_data: str | None,
+    num_timesteps: int,
+    img_dim: int,
+    num_channels: int,
     seed: int,
-    side: int,
 ) -> None:
     # Code for training diffumon
     print("Training diffumon...")
 
+    # Get the train and test directories
+    train_dir: Path
+    test_dir: Path
     if preloaded_data:
         print(f"Downloading and unpacking {preloaded_data} dataset...")
-
-        train_dir: Path
-        test_dir: Path
-
         match preloaded_data:
             case "pokemon":
                 train_dir, test_dir = download_pokemon(
                     output_dir="downloads/pokemon_sprites"
                 )
+                num_channels = 3
             case "mnist":
                 train_dir, test_dir = download_mnist(output_dir="downloads/mnist")
+                num_channels = 1
             case _:
-                raise ValueError(f"Unsupported preloaded dataset {preloaded_data}")
+                raise ValueError(f"Unsupported preloaded datas {preloaded_data}")
+        print(f"num_channels changed to {num_channels} for {preloaded_data} dataset")
+    else:
+        train_dir = Path(data_dir) / "train"
+        test_dir = Path(data_dir) / "test"
+
+    train_ddpm_entrypoint(
+        train_dir=train_dir,
+        test_dir=test_dir,
+        img_dim=img_dim,
+        num_channels=num_channels,
+        num_timesteps=num_timesteps,
+        num_epochs=num_epochs,
+        batch_size=batch_size,
+        checkpoint_path=checkpoint_path,
+        seed=seed,
+    )
 
 
 @main.command(help="Generate image samples from from random noise")
