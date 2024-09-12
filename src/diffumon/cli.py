@@ -1,7 +1,10 @@
+from pathlib import Path
+
 import click
 
-from diffumon.diffusion.sampler import p_sampler
-from diffumon.trainers.train import train_ddpm
+# from diffumon.diffusion.sampler import p_sampler
+# from diffumon.trainers.train import train_ddpm
+from diffumon.data.downloader import download_mnist, download_pokemon
 
 
 # Setup the CLI
@@ -30,7 +33,7 @@ def main():
     "--data-dir",
     default=None,
     type=str,
-    help="Directory containing target images for training",
+    help='Directory containing target images for training. Must contain "train" and "test" subdirectories',
 )
 @click.option(
     "--checkpoint-path",
@@ -42,20 +45,47 @@ def main():
     "--preloaded-data",
     type=str,
     default=None,
-    help="Optional alternate to data-dir, select a preloaded dataset which will be downloaded automatically. Can choose from ['pokemon', 'mnist']",
+    help="(Optional) alternate to data-dir, select a preloaded dataset which will be downloaded automatically. Can choose from ['pokemon', 'mnist']",
+)
+@click.option(
+    "--seed",
+    default=1999,
+    type=int,
+    help="Random seed for training the model",
+)
+@click.option(
+    "side",
+    type=int,
+    default=28,
+    help="Size of the image height and width",
 )
 def train(
-    epochs: int,
+    num_epochs: int,
     batch_size: int,
     data_dir: str | None,
     checkpoint_path: str,
     preloaded_data: str | None,
+    seed: int,
+    side: int,
 ) -> None:
     # Code for training diffumon
     print("Training diffumon...")
 
     if preloaded_data:
         print(f"Downloading and unpacking {preloaded_data} dataset...")
+
+        train_dir: Path
+        test_dir: Path
+
+        match preloaded_data:
+            case "pokemon":
+                train_dir, test_dir = download_pokemon(
+                    output_dir="downloads/pokemon_sprites"
+                )
+            case "mnist":
+                train_dir, test_dir = download_mnist(output_dir="downloads/mnist")
+            case _:
+                raise ValueError(f"Unsupported preloaded dataset {preloaded_data}")
 
 
 @main.command(help="Generate image samples from from random noise")

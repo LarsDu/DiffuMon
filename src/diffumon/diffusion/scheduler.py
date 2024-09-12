@@ -5,7 +5,6 @@ import torch
 from torch import Tensor
 from torch.nn import functional as F
 
-from diffumon.diffusion.scheduler import cosine_beta_schedule, linear_beta_schedule
 from diffumon.utils import get_device
 
 

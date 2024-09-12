@@ -5,8 +5,9 @@ import gzip
 import os
 import shutil
 import tarfile
-from dataclasses import dataclass
 from pathlib import Path
+from random import random
+from typing import Sequence
 
 import requests
 from tqdm import tqdm
@@ -39,6 +40,7 @@ def download_file(url: str | Path, output_path: str) -> None:
 def unpack_tarball(
     tarball_path: str | Path,
     output_dir: str | Path,
+    internal_dirs: list[Path],
     delete_tarball: bool = False,
     extension: str = "gz",
 ) -> None:
@@ -47,32 +49,53 @@ def unpack_tarball(
     Args:
         tarball_path: The path to the tarball to unpack
         output_dir: The directory to unpack the tarball to
+        internal_dirs: The specific internal directories to unpack. If empty, unpack everything
         delete_tarball: Whether to delete the tarball after unpacking
         extension: The extension of the tarball
     """
     tarball_path = Path(tarball_path)
     with tarfile.open(tarball_path, f"r:{extension}") as tar:
-        tar.extractall(output_dir)
+        if internal_dirs:
+            # Extract only the specified internal directories
+            for member in tar.getmembers():
+                if any(str(member).startswith(str(d)) for d in internal_dirs):
+                    tar.extract(member, output_dir)
+        else:
+            # Extract everything
+            tar.extractall(output_dir)
 
     if delete_tarball:
         os.remove(tarball_path)
 
 
 def unpack_gzip(
-    gzip_file: str | Path, output_file: str | Path, delete_gzip: bool = False
+    gzip_file: str | Path,
+    internal_dirs: list[Path] | None,
+    output_dir: str | Path,
+    delete_gzip: bool = False,
 ) -> None:
     """Unpack a gzip file to an output file
 
     Args:
         gzip_file: The path to the gzip file to unpack
-        output_file: The path to save the unpacked file
+        output_dir: The path to save the unpacked file
+        internal_dirs: The specific internal directories to unpack. If None, unpack everything
+        delete_gzip: Whether to delete the gzip file after unpacking
     """
     gzip_file = Path(gzip_file)
-    output_file = Path(output_file)
+    output_dir = Path(output_dir)
 
     with gzip.open(gzip_file, "rb") as f_in:
-        with open(output_file, "wb") as f_out:
-            shutil.copyfileobj(f_in, f_out)
+        with open(output_dir, "wb") as f_out:
+
+            if internal_dirs:
+                # Extract only the specified internal directories
+                for line in f_in:
+                    if any(str(line).startswith(str(d)) for d in internal_dirs):
+                        f_out.write(line)
+            else:
+                # Extract everything
+                shutil.copyfileobj(f_in, f_out)
 
     if delete_gzip:
         os.remove(gzip_file)
@@ -80,43 +103,61 @@ def unpack_gzip(
 
 def download_unpack_images(
     url: str | Path,
-    archive_image_path: str | Path,
     output_dir: str,
+    internal_dirs: Sequence[Path | str] | None = None,
     delete_archive: bool = False,
 ) -> None:
     """Download and unpack images from a URL
 
     Args:
-        source: The source to download the images from
-        archive_image_path: The path within the archive to the desired images
-        output_dir: Once unpacked, copy the images in internal_image_dirs
-            to this directory
-        delete_archive: Whether to delete the tarball or gzip after unpacking
+        url: The source to download the images from
+        output_dir: Once unpacked, copy the images in
+            internal_dirs to this directory
+        internal_dirs: The paths within the archive to
+            the desired images. If None, unpack the whole archive
+        delete_archive: Whether to delete the tarball or
+            gzip after unpacking
+
+    Returns:
+        The path to the output directory
     """
+
+    # Enforce Path type for consistency
     url = Path(url)
-    staging_dir = Path(staging_dir)
+    output_dir = Path(output_dir)
+    if internal_dirs:
+        internal_dirs = [Path(d) for d in internal_dirs]
 
     # Create the output directory if it doesn't exist
-    os.makedirs(staging_dir, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
 
-    # Download the tarball from url to staging dir
-    archive_file: Path = staging_dir / url.name
+    # Download the tarball from url to output_dir
+    archive_file: Path = output_dir / url.name
     download_file(url, archive_file)
 
-    # Unpack the tarball to the staging directory
+    # Unpack the archive to the staging directory
     if archive_file.suffix == ".gz":
-        unpack_gzip(archive_file, archive_image_path, delete_gzip=delete_archive)
+        unpack_gzip(
+            archive_file,
+            internal_dirs=internal_dirs,
+            output_dir=output_dir,
+            delete_gzip=delete_archive,
+        )
     elif archive_file.suffix == ".tar.gz":
         unpack_tarball(
             archive_file,
-            staging_dir,
-            extension=".tar.gz",
+            output_dir=output_dir,
+            internal_dirs=internal_dirs,
             delete_tarball=delete_archive,
+            extension=".tar.gz",
         )
     elif archive_file.suffix == ".tar":
         unpack_tarball(
-            archive_file, staging_dir, extension=".tar", delete_tarball=delete_archive
+            archive_file,
+            output_dir=output_dir,
+            internal_dirs=internal_dirs,
+            delete_tarball=delete_archive,
+            extension=".tar",
         )
     else:
         raise ValueError(f"Unsupported archive extension in {archive_file.name}")
@@ -125,33 +166,126 @@ def download_unpack_images(
         os.remove(archive_file)
 
 
-### DATASET SPECIFIC DOWNLOADERS ###
-@dataclass
-class SplitDir:
-    """Where to find the training, validation, and test splits
-
-    Attributes:
-        train: The training split directory
-        val: The validation split directory
-        test: The test split directory
-    """
-
-    train: Path
-    val: Path
-    test: Path
-
-
-def download_pokemon(
+def download_pokemon_sprites(
     url: str = "https://github.com/PokeAPI/sprites/archive/refs/tags/2.0.0.tar.gz",
-) -> SplitDir:
-    pass
+    test_size: float = 0.15,
+    output_dir: str | Path = "downloads/pokemon_sprites",
+    archive_image_path: str | Path = "sprites-2.0.0/sprites/pokemon",
+    split_seed: int = 1999,
+    delete_archive: bool = True,
+    delete_staging: bool = True,
+) -> tuple[Path, Path]:
+    """Download a pokemon sprite dataset
+
+    Partition the dataset into 'train' and 'test' subdirectories
+
+    Args:
+        url: The URL to download the dataset
+        test_size: The proportion of samples to use for the test set
+        output_dir: The directory to save the downloaded dataset. Will create 'train' and 'test' subdirectories
+        split_seed: The seed to use for the random train/test split
+
+    Returns:
+        The paths to the 'train' and 'test' subdirectories
+    """
+    output_dir = Path(output_dir)
+    archive_image_path = Path(archive_image_path)
+
+    # Download the tarball to the staging directory
+    staging_dir = output_dir / "staging"
+
+    # Create the staging directory if it doesn't exist
+    staging_dir.mkdir(parents=True, exist_ok=True)
+
+    # Download the tarball from url to staging dir
+    download_unpack_images(
+        url,
+        archive_image_path=archive_image_path,
+        output_dir=staging_dir,
+        delete_archive=delete_archive,
+    )
+
+    # Split the images into 'train' and 'test' subdirectories
+    train_dir = output_dir / "train"
+    test_dir = output_dir / "test"
+
+    # Create the 'train' and 'test' directories
+    os.makedirs(train_dir, exist_ok=True)
+    os.makedirs(test_dir, exist_ok=True)
+
+    # Randomly select images for the test set
+    images = list(staging_dir.glob("*"))
+    random.seed(split_seed)
+    random.shuffle(images)
+    # The first test_size proportion of images are for the test set
+    test_images = images[: int(test_size * len(images))]
+    # The remaining images are for the training set
+    train_images = images[int(test_size * len(images)) :]
+
+    # Copy the images to the 'train' and 'test' directories
+    for img in train_images:
+        shutil.copy(img, train_dir / img.name)
+    for img in test_images:
+        shutil.copy(img, test_dir / img.name)
+
+    if delete_staging:
+        shutil.rmtree(staging_dir)
+
+    return train_dir, test_dir
 
 
 def download_mnist(
-    train_url: str = "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
-    test_url: str = "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
-    # train_labels_url: str = "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz",
-    # test_labels_url: str = "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz",
-    val_size: int = 10000,
-) -> SplitDir:
-    pass
+    train_url: (
+        str | Path
+    ) = "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
+    test_url: str | Path = "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
+    output_dir: str | Path = "downloads/mnist",
+    delete_archives: bool = True,
+) -> tuple[Path, Path]:
+    """Download the MNIST dataset
+    Partition the 60,000 train, 10,000 test samples into 'train' and 'test' subdirectories
+
+    Args:
+        train_url: The URL to download the training set
+        test_url: The URL to download the test set
+        output_dir: The directory to save the downloaded dataset. Will create 'train' and 'test' subdirectories
+        delete_archives: Whether to delete the downloaded files after unpacking
+    Returns:
+        The paths to the 'train' and 'test' subdirectories
+    """
+
+    # Enforce Path type for consistency
+    test_url = Path(test_url)
+    train_url = Path(train_url)
+    output_dir = Path(output_dir)
+
+    # Download the tarball to the staging directory
+    staging_dir = output_dir / "staging"
+
+    # Create the staging directory if it doesn't exist
+    staging_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create train and test directories
+    train_dir = output_dir / "train"
+    test_dir = output_dir / "test"
+
+    # Create the 'train' and 'test' directories
+    os.makedirs(train_dir, exist_ok=True)
+    os.makedirs(test_dir, exist_ok=True)
+
+    # Download the tarball from url to staging dir
+    download_unpack_images(
+        train_url,
+        archive_image_path=None,  # Unpack the whole thing
+        output_dir=train_dir,
+        delete_archive=delete_archives,
+    )
+
+    download_unpack_images(
+        test_url,
+        archive_image_path=None,  # Unpack the whole thing
+        output_dir=test_dir,
+        delete_archive=delete_archives,
+    )
+
+    return train_dir, test_dir
