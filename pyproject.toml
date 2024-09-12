@@ -24,6 +24,7 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
+
 dev-dependencies = [
     "black>=24.8.0",
     "ruff>=0.6.4",
@@ -41,3 +42,6 @@ packages = ["src/diffumon"]
 
 [project.scripts]
 diffumon = 'diffumon.cli:main'
+
+[tool.isort]
+profile = "black"
