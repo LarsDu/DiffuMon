@@ -14,6 +14,7 @@ class NoiseScheduleOption(Enum):
     COSINE = "cosine"
 
 
+@torch.no_grad()
 def cosine_beta_schedule(
     timesteps: int,
     s: float = 0.008,
@@ -35,6 +36,7 @@ def cosine_beta_schedule(
     return torch.clip(betas, lower_clip, upper_clip)
 
 
+@torch.no_grad()
 def linear_beta_schedule(
     timesteps: int, beta_start=0.0001, beta_end=0.02, device: torch.device | None = None
 ) -> Tensor:
@@ -78,6 +80,7 @@ class NoiseSchedule:
         return self.betas.shape[0]
 
 
+@torch.no_grad()
 def create_noise_schedule(
     timesteps: int, option: NoiseScheduleOption, device: torch.device | None, **kwargs
 ) -> NoiseSchedule:
