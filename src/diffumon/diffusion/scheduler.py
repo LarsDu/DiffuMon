@@ -7,9 +7,9 @@ from diffumon.utils import get_device
 def cosine_beta_schedule(
     timesteps: int,
     s: float = 0.008,
-    lower_clip = 0.0001,
-    upper_clip = 0.9999,
-    device: torch.device | None = None
+    lower_clip=0.0001,
+    upper_clip=0.9999,
+    device: torch.device | None = None,
 ) -> Tensor:
     """
     Cosine schedule as proposed in https://arxiv.org/abs/2102.09672

@@ -19,7 +19,7 @@ def q_forward(
     Returns:
         Tuple of (x_t noised tensor, ground truth noise applied to x0)
     """
-    noise = torch.randn_like(x0, device = x0.device)
+    noise = torch.randn_like(x0, device=x0.device)
     return (
         x0 + ns.sqrt_alphas_cum_prod[t].view(-1, 1, 1, 1) * noise,
         noise,
