@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 import numpy as np
 import torch
-from matplotlib.axes import Axes
 from torch import Tensor, nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
@@ -14,27 +13,8 @@ from diffumon.diffusion.scheduler import (
     NoiseScheduleOption,
     create_noise_schedule,
 )
-from diffumon.metrics.plots import plot_train_val_losses
+from diffumon.trainers.summary import TrainingSummary
 from diffumon.utils import get_device
-
-
-@dataclass
-class TrainingSummary:
-    """Encapsulates the training summary for a model
-
-    Attributes:
-        train_losses: The average training batch loss for every epoch.
-        val_losses: The average validation batch loss for every epoch.
-        test_loss: The average test batch loss for the test set.
-    """
-
-    train_losses: np.ndarray
-    val_losses: np.ndarray
-    test_loss: float
-
-    def plot_train_val_losses(self) -> Axes:
-        """Plot the training and validation losses"""
-        return plot_train_val_losses(self.train_losses, self.val_losses)
 
 
 def loss_fn(
@@ -91,7 +71,7 @@ def eval_epoch(
     return avg_loss
 
 
-def train(
+def train_ddpm(
     model: nn.Module,
     train_dataloader: DataLoader,
     val_dataloader: DataLoader,
@@ -104,7 +84,7 @@ def train(
     show_loss_every: int = 100,
     checkpoint_path: str = "checkpoints/last_diffumon_checkpoint.pth",
 ) -> tuple[nn.Module, TrainingSummary]:
-    """Train a denoising diffusion model for images
+    """Train a denoising diffusion probabilistic model for images
 
     Args:
         model: Noise prediction model we want to train

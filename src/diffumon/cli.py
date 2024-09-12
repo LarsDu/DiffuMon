@@ -1,6 +1,7 @@
 import click
 
-from diffumon.data import DownloadImageSource
+from diffumon.diffusion.sampler import p_sampler
+from diffumon.trainers.train import train_ddpm
 
 
 # Setup the CLI
@@ -53,12 +54,6 @@ def train(
     # Code for training diffumon
     print("Training diffumon...")
 
-    preloaded_datasets = {
-        "pokemon": DownloadImageSource(
-            url="https://github.com/PokeAPI/sprites/archive/refs/tags/2.0.0.tar.gz",
-            internal_image_dirs=["sprites/pokemon"],
-        ),
-    }
     if preloaded_data:
         print(f"Downloading and unpacking {preloaded_data} dataset...")
 
