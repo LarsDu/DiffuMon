@@ -9,14 +9,10 @@ from typing import Callable
 import torch
 from torch import Tensor, nn
 
+from diffumon.models.attention import Attention, LinearAttention
+from diffumon.models.helpers import Downsample, Upsample, default
 from diffumon.models.positional_embed import SinusoidalPositionEmbeddings
 from diffumon.models.resnet import ResnetBlock
-
-
-def default(val, d):
-    if val is not None:
-        return val
-    return d() if callable(d) else d
 
 
 class Residual(nn.Module):
