@@ -4,12 +4,13 @@ from diffumon.diffusion.scheduler import NoiseSchedule
 from diffumon.diffusion.noiser import q_forward
 from diffumon.diffusion.scheduler import NoiseScheduleOption, create_noise_schedule
 from diffumon.utils import get_device
+from diffumon.metrics.plots import plot_train_val_losses
 from torch.nn import functional as F
 import torch
 
 from torch.utils.data import DataLoader
 from dataclasses import dataclass
-
+from matplotlib.axes import Axes
 from tqdm import tqdm
 
 
@@ -27,6 +28,9 @@ class TrainingSummary:
     val_losses: np.ndarray
     test_loss: float
 
+    def plot_train_val_losses(self) -> Axes:
+        """Plot the training and validation losses"""
+        return plot_train_val_losses(self.train_losses, self.val_losses)
 
 def loss_fn(
     model: nn.Module,
