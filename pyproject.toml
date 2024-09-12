@@ -1,7 +1,7 @@
 [project]
 name = "diffumon"
 version = "0.1.0"
-description = "Add your description here"
+description = "Basic Denoising Diffusion Probabilistic Model image generator implemented in PyTorch"
 authors = [
     { name = "Larry Du", email = "larrydu88@gmail.com" }
 ]
