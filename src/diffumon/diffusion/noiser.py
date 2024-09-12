@@ -1,5 +1,6 @@
 import torch
 from torch import Tensor
+
 from diffumon.diffusion.scheduler import NoiseSchedule
 
 

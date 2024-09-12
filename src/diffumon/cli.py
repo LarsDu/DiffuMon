@@ -1,9 +1,13 @@
 import click
+
 from diffumon.data import DownloadImageSource
 
+
 # Setup the CLI
-@click.group(help="Basic denoising diffusion model for image generation",
-             context_settings={"show_default": True})
+@click.group(
+    help="Basic denoising diffusion model for image generation",
+    context_settings={"show_default": True},
+)
 def main():
     pass
 
@@ -57,7 +61,6 @@ def train(
     }
     if preloaded_data:
         print(f"Downloading and unpacking {preloaded_data} dataset...")
-        
 
 
 @main.command(help="Generate image samples from from random noise")

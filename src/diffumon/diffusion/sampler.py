@@ -1,8 +1,9 @@
 from typing import Sequence
+
 import torch
-from torch import nn
+from torch import Tensor, nn
+
 from diffumon.diffusion.scheduler import NoiseSchedule
-from torch import Tensor
 
 
 def p_sampler(

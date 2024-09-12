@@ -1,11 +1,13 @@
 """Utils for automatic downloading of data for training
 """
 
-from dataclasses import dataclass
 import os
-import requests
 import shutil
 import tarfile
+from dataclasses import dataclass
+
+import requests
+
 
 @dataclass
 class DownloadImageSource:
@@ -16,12 +18,14 @@ class DownloadImageSource:
         internal_image_dirs: Once downloaded and unzipped, the directory containing
             the images actually intended for training
     """
+
     url: str
     internal_image_dirs: list[str]
 
     @property
     def name(self) -> str:
         return self.url.split("/")[-1].split(".")[0]
+
 
 def download_file(url: str, output_path: str) -> None:
     """Download a file from a URL to a path
@@ -35,6 +39,7 @@ def download_file(url: str, output_path: str) -> None:
             shutil.copyfileobj(r.raw, f)
 
     return output_path
+
 
 def unpack_tarball(
     tarball_path: str,
@@ -53,7 +58,7 @@ def unpack_tarball(
 
     if delete_tarball:
         os.remove(tarball_path)
-)
+
 
 def download_unpack_images(
     source: DownloadImageSource,
@@ -95,8 +100,3 @@ def download_unpack_images(
 
     if delete_staging_dir:
         shutil.rmtree(staging_dir)
-
-
-
-
-

@@ -1,11 +1,9 @@
-from matplotlib.axes import Axes
-from matplotlib import pyplot as plt
 import numpy as np
+from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
 
 
-def plot_train_val_losses(
-    train_losses: np.ndarray, val_losses: np.ndarray
-) -> Axes:
+def plot_train_val_losses(train_losses: np.ndarray, val_losses: np.ndarray) -> Axes:
     """Plot the training and validation losses"""
     _, ax = plt.subplots()
     ax.plot(train_losses, label="Train")

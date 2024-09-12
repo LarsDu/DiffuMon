@@ -1,17 +1,21 @@
-from torch import nn, Tensor
-import numpy as np
-from diffumon.diffusion.scheduler import NoiseSchedule
-from diffumon.diffusion.noiser import q_forward
-from diffumon.diffusion.scheduler import NoiseScheduleOption, create_noise_schedule
-from diffumon.utils import get_device
-from diffumon.metrics.plots import plot_train_val_losses
-from torch.nn import functional as F
-import torch
-
-from torch.utils.data import DataLoader
 from dataclasses import dataclass
+
+import numpy as np
+import torch
 from matplotlib.axes import Axes
+from torch import Tensor, nn
+from torch.nn import functional as F
+from torch.utils.data import DataLoader
 from tqdm import tqdm
+
+from diffumon.diffusion.noiser import q_forward
+from diffumon.diffusion.scheduler import (
+    NoiseSchedule,
+    NoiseScheduleOption,
+    create_noise_schedule,
+)
+from diffumon.metrics.plots import plot_train_val_losses
+from diffumon.utils import get_device
 
 
 @dataclass
@@ -31,6 +35,7 @@ class TrainingSummary:
     def plot_train_val_losses(self) -> Axes:
         """Plot the training and validation losses"""
         return plot_train_val_losses(self.train_losses, self.val_losses)
+
 
 def loss_fn(
     model: nn.Module,
@@ -57,6 +62,7 @@ def loss_fn(
     pred_noise = model(xt, t)
     return F.mse_loss(pred_noise, true_noise)
 
+
 @torch.no_grad()
 def eval_epoch(
     model: nn.Module,
@@ -78,12 +84,7 @@ def eval_epoch(
     for x0 in dataloader:
         x0 = x0.to(model.device)
         t_sample = torch.randn(x0.shape[0], device=model.device)
-        loss = loss_fn(
-            model=model,
-            x0=x0,
-            t=t_sample,
-            ns=ns
-        )
+        loss = loss_fn(model=model, x0=x0, t=t_sample, ns=ns)
         total_batch_loss += loss.item()
 
     avg_loss = total_batch_loss / len(dataloader)
