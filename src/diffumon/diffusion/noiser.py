@@ -8,7 +8,6 @@ def q_forward(
     x0: Tensor,
     t: Tensor,
     ns: NoiseSchedule,
-    seed: int = 1999,
 ) -> Tensor:
     """Noise the x0 tensor according to the noise schedule at timestep t.
 

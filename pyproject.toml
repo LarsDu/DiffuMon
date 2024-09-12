@@ -12,6 +12,8 @@ dependencies = [
     "torchvision>=0.19.1",
     "pandas>=2.2.2",
     "click>=8.1.7",
+    "tqdm>=4.66.5",
+    "einops>=0.8.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

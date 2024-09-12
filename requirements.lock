@@ -12,6 +12,8 @@
 -e file:.
 click==8.1.7
     # via diffumon
+einops==0.8.0
+    # via diffumon
 filelock==3.16.0
     # via torch
     # via triton
@@ -76,6 +78,8 @@ torch==2.4.1
     # via diffumon
     # via torchvision
 torchvision==0.19.1
+    # via diffumon
+tqdm==4.66.5
     # via diffumon
 triton==3.0.0
     # via torch
