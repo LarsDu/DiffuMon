@@ -1,5 +1,5 @@
 import click
-
+from diffumon.data import DownloadImageSource
 
 # Setup the CLI
 @click.group(help="Basic denoising diffusion model for image generation",
@@ -49,6 +49,16 @@ def train(
     # Code for training diffumon
     print("Training diffumon...")
 
+    preloaded_datasets = {
+        "pokemon": DownloadImageSource(
+            url="https://github.com/PokeAPI/sprites/archive/refs/tags/2.0.0.tar.gz",
+            internal_image_dirs=["sprites/pokemon"],
+        ),
+    }
+    if preloaded_data:
+        print(f"Downloading and unpacking {preloaded_data} dataset...")
+        
+
 
 @main.command(help="Generate image samples from from random noise")
 @click.option(
@@ -70,7 +80,6 @@ def train(
     "--seed", default=1999, type=int, help="Random seed for generating samples"
 )
 def sample(num_samples: int, output_dir: str, model_path: str, seed: int) -> None:
-
     # Code for sampling diffumon
     print("Generating samples...")
 
