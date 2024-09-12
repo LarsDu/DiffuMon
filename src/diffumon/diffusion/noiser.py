@@ -8,6 +8,7 @@ def q_forward(
     x0: Tensor,
     t: Tensor,
     ns: NoiseSchedule,
+    seed: int = 1999,
 ) -> Tensor:
     """Noise the x0 tensor according to the noise schedule at timestep t.
 
@@ -20,6 +21,8 @@ def q_forward(
         Tuple of (x_t noised tensor, ground truth noise applied to x0)
     """
     noise = torch.randn_like(x0, device=x0.device)
+
+    # Select the ts in your batch sample
     return (
         x0 + ns.sqrt_alphas_cum_prod[t].view(-1, 1, 1, 1) * noise,
         noise,
