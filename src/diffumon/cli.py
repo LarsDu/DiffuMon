@@ -2,7 +2,8 @@ import click
 
 
 # Setup the CLI
-@click.group(help="Basic denoising diffusion model for image generation")
+@click.group(help="Basic denoising diffusion model for image generation",
+             context_settings={"show_default": True})
 def main():
     pass
 
@@ -12,12 +13,39 @@ def main():
     "--num-epochs",
     default=20,
     type=int,
-    help="Number of epochs to train the model" "--batch-size",
+    help="Number of epochs to train the model",
+)
+@click.option(
+    "--batch-size",
     default=160,
     type=int,
     help="Batch size for training the model",
 )
-def train(epochs: int, batch_size: int) -> None:
+@click.option(
+    "--data-dir",
+    default=None,
+    type=str,
+    help="Directory containing target images for training",
+)
+@click.option(
+    "--checkpoint-path",
+    default="checkpoints/last_diffumon_checkpoint.pth",
+    type=str,
+    help="Path to save the trained model",
+)
+@click.option(
+    "--preloaded-data",
+    type=str,
+    default=None,
+    help="Optional alternate to data-dir, select a preloaded dataset which will be downloaded automatically. Can choose from ['pokemon', 'mnist']",
+)
+def train(
+    epochs: int,
+    batch_size: int,
+    data_dir: str | None,
+    checkpoint_path: str,
+    preloaded_data: str | None,
+) -> None:
     # Code for training diffumon
     print("Training diffumon...")
 

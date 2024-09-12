@@ -53,7 +53,7 @@ def loss_fn(
     pred_noise = model(xt, t)
     return F.mse_loss(pred_noise, true_noise)
 
-
+@torch.no_grad()
 def eval_epoch(
     model: nn.Module,
     dataloader: DataLoader,
@@ -71,8 +71,19 @@ def eval_epoch(
     """
     model.eval()
     total_batch_loss = 0
-    tot_num_samples = 0
-    pass
+    for x0 in dataloader:
+        x0 = x0.to(model.device)
+        t_sample = torch.randn(x0.shape[0], device=model.device)
+        loss = loss_fn(
+            model=model,
+            x0=x0,
+            t=t_sample,
+            ns=ns
+        )
+        total_batch_loss += loss.item()
+
+    avg_loss = total_batch_loss / len(dataloader)
+    return avg_loss
 
 
 def train(
@@ -88,7 +99,7 @@ def train(
     show_loss_every: int = 100,
     checkpoint_path: str = "checkpoints/last_diffumon_checkpoint.pth",
 ) -> tuple[nn.Module, TrainingSummary]:
-    """
+    """Train a denoising diffusion model for images
 
     Args:
         model: Noise prediction model we want to train
@@ -101,6 +112,8 @@ def train(
         num_timesteps: The number of timesteps in the diffusion process
         noise_option: The noise schedule option to use
         show_loss_every: Show the batch loss every n iterations
+        checkpoint_path: The path to save the trained model
+
     Returns:
         The trained model and the training summary
 
@@ -140,7 +153,7 @@ def train(
 
         # Compute the average batch loss for the epoch
         train_losses.append(epoch_train_loss / len(train_dataloader))
-        # Compute the average validation batch loss for the epoch
+        # Compute the average validation batch loss across the validation set
         val_losses.append(eval_epoch(model, val_dataloader, ns))
 
     avg_test_batch_loss = eval_epoch(model, test_dataloader, ns)
