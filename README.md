@@ -42,7 +42,7 @@ Also included is a notebook that demonstrates the usage of the model under noteb
 
 ## Developer notes
 
-`black`, `ruff`, `isort`, and `pre-commit` should come as preinstalled dev developer packages in the virtual enviornment.
+`black`, `ruff`, `isort`, and `pre-commit` should come as preinstalled dev developer packages in the virtual environment.
 
 It's strongly recommended to install pre-commit hooks to ensure code consistency and quality.
 
