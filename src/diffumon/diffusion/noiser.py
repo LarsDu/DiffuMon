@@ -4,6 +4,7 @@ from torch import Tensor
 from diffumon.diffusion.scheduler import NoiseSchedule
 
 
+@torch.compile
 @torch.no_grad()
 def q_forward(
     x0: Tensor,

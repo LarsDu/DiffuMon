@@ -20,7 +20,7 @@ def forward_transform(x: Tensor, resize_dims: Sequence[int]) -> Tensor:
         [
             Resize(resize_dims),
             CenterCrop(resize_dims),
-            ToTensor(),
+            ToTensor(),  # Convert image to tensor and rescale to [0, 1]
             Lambda(lambda t: (t * 2) - 1),  # Rescale to [-1, 1]
         ]
     )
