@@ -92,6 +92,7 @@ idna==3.8
 ipykernel==6.29.5
     # via jupyterlab
 ipython==8.27.0
+    # via black
     # via ipykernel
 isoduration==20.11.0
     # via jsonschema
@@ -310,6 +311,8 @@ terminado==0.18.1
     # via jupyter-server-terminals
 tinycss2==1.3.0
     # via nbconvert
+tokenize-rt==6.0.0
+    # via black
 torch==2.4.1
     # via diffumon
     # via torchvision

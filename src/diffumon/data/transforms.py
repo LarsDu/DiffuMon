@@ -42,7 +42,12 @@ def forward_transform_augmented_v1(resize_dims: Sequence[int]) -> Callable:
 
 
 def reverse_transform() -> Callable:
-    """Convert tensor to a numpy image"""
+    """Convert an unbatched tensor to a numpy image
+
+    Usage:
+    For a [b, c, h, w] tensor do something like
+    [reverse_transform(img) for img in batched_tensor]
+    """
     return Compose(
         [
             Lambda(lambda t: (t + 1) / 2 * 255.0),  # Rescale to [0, 255]
