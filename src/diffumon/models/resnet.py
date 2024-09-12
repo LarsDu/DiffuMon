@@ -1,3 +1,8 @@
+"""
+Resnet adopted from lucidrains
+https://github.com/lucidrains/denoising-diffusion-pytorch/blob/main/denoising_diffusion_pytorch/denoising_diffusion_pytorch.py
+"""
+
 from functools import partial
 
 import torch

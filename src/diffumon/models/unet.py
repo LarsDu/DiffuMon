@@ -1,8 +1,15 @@
+"""
+Resnet adopted from lucidrains
+https://github.com/lucidrains/denoising-diffusion-pytorch/blob/main/denoising_diffusion_pytorch/denoising_diffusion_pytorch.py
+"""
+
 from functools import partial
+from typing import Callable
 
 import torch
-from torch import nn
+from torch import Tensor, nn
 
+from diffumon.models.positional_embed import SinusoidalPositionEmbeddings
 from diffumon.models.resnet import ResnetBlock
 
 
@@ -12,16 +19,36 @@ def default(val, d):
     return d() if callable(d) else d
 
 
+class Residual(nn.Module):
+    def __init__(self, fn: Callable):
+        super().__init__()
+        self.fn = fn
+
+    def forward(self, x: Tensor, *args, **kwargs) -> Tensor:
+        return self.fn(x, *args, **kwargs) + x
+
+
+class PreNorm(nn.Module):
+    def __init__(self, dim: int, fn: Callable) -> None:
+        super().__init__()
+        self.fn = fn
+        self.norm = nn.GroupNorm(1, dim)
+
+    def forward(self, x: Tensor) -> Tensor:
+        x = self.norm(x)
+        return self.fn(x)
+
+
 class Unet(nn.Module):
     def __init__(
         self,
-        dim,
-        init_dim=None,
-        out_dim=None,
-        dim_mults=(1, 2, 4, 8),
-        channels=3,
-        self_condition=False,
-        resnet_block_groups=4,
+        dim: int,
+        init_dim: int | None = None,
+        out_dim: int | None = None,
+        dim_mults: tuple[int] = (1, 2, 4, 8),
+        channels: int = 3,
+        self_condition: bool = False,
+        resnet_block_groups: int = 4,
     ):
         super().__init__()
 
