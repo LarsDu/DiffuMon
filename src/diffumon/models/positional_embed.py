@@ -10,7 +10,7 @@ from torch import Tensor, nn
 
 
 class SinusoidalPosEmb(nn.Module):
-    def __init__(self, dim: int, theta: Tensor = 10000):
+    def __init__(self, dim: int, theta: int = 10000):
         super().__init__()
         self.dim = dim
         self.theta = theta
