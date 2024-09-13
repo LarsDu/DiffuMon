@@ -346,10 +346,10 @@ def download_pokemon_sprites(
     # Randomly select images for the test set
 
     images = [img for img in staging_dir.rglob(f"*{img_file_extension}")]
-    for image in images:
-        if convert_alpha_to_white:
-            # Convert the alpha channel to white
-            convert_to_rgb_with_white_bg(image)
+    if convert_alpha_to_white:
+        print("Converting images with transparency to RGB with white background")
+        for image in images:
+            convert_to_rgb_with_white_bg(image, image)
     random.seed(split_seed)
     random.shuffle(images)
     # The first test_size proportion of images are for the test set
