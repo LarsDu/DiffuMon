@@ -128,8 +128,6 @@ def train(
                 full_train_dataset, test_dataset = download_pokemon_sprites(
                     output_dir="downloads/pokemon_sprites", transform=forward_t
                 )
-                print(full_train_dataset)
-                print(test_dataset)
                 num_channels = 3
             case "mnist":
                 # Hack to get around MNIST download issue
