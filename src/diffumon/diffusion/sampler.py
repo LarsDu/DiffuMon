@@ -74,6 +74,7 @@ def p_sampler_to_images(
     dims: Sequence[int],
     seed: int,
     output_dir: str | Path | None,
+    device: torch.device | None = None,
 ) -> list[PILImage]:
     """Sample from the model's prior distribution and convert to images.
 
@@ -88,9 +89,11 @@ def p_sampler_to_images(
     Returns:
         The path to the directory containing the generated samples
     """
+    if device is None:
+        device = get_device()
     # Create a batch of synthetic samples [b, c, h, w]
     sample_batch = p_sampler(
-        model=model, ns=ns, dims=dims, num_samples=num_samples, seed=seed
+        model=model, ns=ns, dims=dims, num_samples=num_samples, seed=seed, device=device
     )
     # Get the compose transform Callable
     reverse_transform_func: Callable = reverse_transform()

@@ -227,6 +227,12 @@ def train(
     help="Number of channels in the images",
 )
 @click.option(
+    "--device",
+    default=None,
+    type=str,
+    help="(Optional) Manually specify the device to use for sampling. Useful if you have some GPU training in the background",
+)
+@click.option(
     "--seed", default=1999, type=int, help="Random seed for generating samples"
 )
 def sample(
@@ -235,9 +241,13 @@ def sample(
     checkpoint_path: str,
     img_dim: int,
     num_channels: int,
+    device: str | None,
     seed: int,
 ) -> None:
     # Code for sampling diffumon
+
+    if device is None:
+        device = get_device()
 
     # Load the trained model
     print(f"Loading trained model from {checkpoint_path}...")
@@ -263,6 +273,7 @@ def sample(
         dims=(num_channels, img_dim, img_dim),
         seed=seed,
         output_dir=output_dir,
+        device=device,
     )
 
 
