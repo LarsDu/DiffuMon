@@ -1,9 +1,11 @@
 import pickle
+import urllib.request
 
 import click
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset, random_split
+from torchvision import datasets
 from torchvision.datasets import ImageFolder
 
 from diffumon.data.downloader import download_pokemon_sprites
@@ -27,7 +29,7 @@ def main():
 @click.option(
     "--preloaded-data",
     type=str,
-    default="pokemon",
+    default="mnist",
     help="(Optional) alternate to data-dir, select a preloaded dataset which will be downloaded automatically. Can choose from ['pokemon', 'mnist']. Will override num_channels accoring to the dataset",
 )
 @click.option(
@@ -126,23 +128,39 @@ def train(
                 )
                 num_channels = 3
             case "mnist":
-                raise NotImplementedError("MNIST auto download is not yet supported")
-                """
-                full_train_dataset, test_dataset = download_mnist(
-                    output_dir="downloads/mnist", transform = forward_t
+                # Hack to get around MNIST download issue
+                class CustomURLopener(urllib.request.FancyURLopener):
+                    version = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+
+                # Override the default URL opener
+                urllib.request._urlopener = CustomURLopener()
+                full_train_dataset = datasets.MNIST(
+                    root="downloads/mnist",
+                    train=True,
+                    download=True,
+                    transform=forward_t,
+                )
+                test_dataset = datasets.MNIST(
+                    root="downloads/mnist",
+                    train=False,
+                    download=True,
+                    transform=forward_t,
                 )
                 num_channels = 1
-                """
             case "fashion_mnist":
-                raise NotImplementedError(
-                    "Fashion MNIST auto download is not yet supported"
+                full_train_dataset = datasets.FashionMNIST(
+                    root="downloads/fashion_mnist",
+                    train=True,
+                    download=True,
+                    transform=forward_t,
                 )
-                """
-                full_train_dataset, test_dataset = download_fashion(
-                    output_dir="downloads/fashion_mnist", transform=forward_t
+                test_dataset = datasets.FashionMNIST(
+                    root="downloads/fashion_mnist",
+                    train=False,
+                    download=True,
+                    transform=forward_t,
                 )
                 num_channels = 1
-                """
             case _:
                 raise ValueError(f"Unsupported preloaded datas {preloaded_data}")
         print(f"num_channels changed to {num_channels} for {preloaded_data} dataset")
