@@ -12,6 +12,7 @@ from typing import Callable, Sequence
 
 import py7zr
 import requests
+from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
 from tqdm import tqdm
@@ -239,6 +240,35 @@ def download_unpack_images(
         raise ValueError(f"Unsupported archive extension in {archive_file.name}")
 
 
+def convert_to_rgb_with_white_bg(
+    input_path: str | Path, output_path: str | Path, output_format: str = "PNG"
+) -> None:
+    """
+    Converts a PNG image with alpha transparency to an RGB image with a white background.
+
+    Args:
+        input_path: Path to the input PNG image.
+        output_path (str): Path to save the converted RGB image.
+    """
+    # Open the input image
+    image = Image.open(input_path)
+
+    # Check if the image has an alpha channel
+    if image.mode in ("RGBA", "LA") or (
+        image.mode == "P" and "transparency" in image.info
+    ):
+        # Create a white background image
+        bg_image = Image.new("RGB", image.size, (255, 255, 255))
+        # Paste the input image onto the white background using the alpha channel as a mask
+        bg_image.paste(image, mask=image.split()[3])  # Use the alpha channel as mask
+    else:
+        # If the image has no alpha channel, convert it directly to RGB
+        bg_image = image.convert("RGB")
+
+    # Save the image in RGB format
+    bg_image.save(output_path, format=output_format)
+
+
 def download_pokemon_sprites(
     url: str = "https://github.com/PokeAPI/sprites/archive/refs/tags/2.0.0.tar.gz",
     transform: Callable | None = None,
@@ -250,6 +280,7 @@ def download_pokemon_sprites(
     delete_archive: bool = True,
     delete_staging: bool = True,
     img_file_extension: str = ".png",
+    convert_alpha_to_white: bool = True,
 ) -> tuple[Dataset, Dataset]:
     """Download a pokemon sprite dataset
 
@@ -267,6 +298,8 @@ def download_pokemon_sprites(
         delete_archive: Whether to delete the downloaded files after unpacking
         delete_staging: Whether to delete the staging directory after completion
         img_file_extension: The file extension of the images in the dataset
+        convert_alpha_to_white: Whether to convert the alpha channel to white
+            for images with transparency
     Returns:
         The 'train' and 'test' ImageFolder datasets
     """
@@ -313,6 +346,10 @@ def download_pokemon_sprites(
     # Randomly select images for the test set
 
     images = [img for img in staging_dir.rglob(f"*{img_file_extension}")]
+    for image in images:
+        if convert_alpha_to_white:
+            # Convert the alpha channel to white
+            convert_to_rgb_with_white_bg(image)
     random.seed(split_seed)
     random.shuffle(images)
     # The first test_size proportion of images are for the test set

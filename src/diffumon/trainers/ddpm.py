@@ -124,7 +124,6 @@ def train_ddpm(
     ns = create_noise_schedule(
         timesteps=num_timesteps, option=noise_option, device=device
     )
-
     train_losses = []
     val_losses = []
     for epoch in tqdm(range(num_epochs)):
@@ -184,6 +183,7 @@ def train_ddpm(
                 "model_state_dict": model.state_dict(),
                 "noise_schedule": pickle.dumps(ns),
                 "summary": pickle.dumps(summary),
+                "img_dims": pickle.dumps(train_dataloader.dataset[0][0].shape[1:]),
             },
             f,
         )
