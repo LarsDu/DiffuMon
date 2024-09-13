@@ -29,12 +29,12 @@ def main():
 @click.option(
     "--preloaded",
     type=str,
-    default="fashion_mnist",
+    default="mnist",
     help="Select a preloaded dataset which will be downloaded automatically. Can choose from ['pokemon', 'mnist', 'fashion_mnist']. Will override num_channels accoring to the dataset. NOTE: pokemon dataset is currently too small for effective sampling.",
 )
 @click.option(
     "--num-epochs",
-    default=8,
+    default=6,
     type=int,
     help="Number of epochs to train the model",
 )
