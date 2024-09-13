@@ -154,7 +154,7 @@ def train_ddpm(
                 "model_state_dict": model.state_dict(),
                 "noise_schedule": pickle.dumps(ns),
             },
-            checkpoint_path,
+            f,
         )
 
     return model, summary
