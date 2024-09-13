@@ -16,6 +16,9 @@ from diffumon.diffusion.scheduler import (
 from diffumon.trainers.summary import TrainingSummary
 from diffumon.utils import get_device
 
+# Utilize high precision for matrix multiplication
+torch.set_float32_matmul_precision("high")
+
 
 def loss_fn(
     model: nn.Module,
@@ -81,7 +84,7 @@ def train_ddpm(
     lr: float = 1e-4,
     num_timesteps: int = 1000,
     noise_option: NoiseScheduleOption = NoiseScheduleOption.COSINE,
-    show_loss_every: int = 20,
+    show_loss_every: int = 4,
     checkpoint_path: str = "checkpoints/last_diffumon_checkpoint.pth",
 ) -> tuple[nn.Module, TrainingSummary]:
     """Train a denoising diffusion probabilistic model for images
@@ -103,6 +106,7 @@ def train_ddpm(
         The trained model and the training summary
 
     """
+
     device = get_device()
     model.to(device)
     model.train()
