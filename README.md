@@ -56,6 +56,26 @@ diffumon train --preloaded fashion_mnist --num-epochs 100 --checkpoint-path chec
 diffumon train --preloaded pokemon_11k --num-epochs 2048 --img-dim 32 --checkpoint-path checkpoints/pokemon_11k_2048_epochs_32dim.pth
 ```
 
+### Train a model on a dataset of your choice
+
+```bash
+diffumon train --data-dir /path/to/dataset --num-epochs 100 --checkpoint-path checkpoints/my_dataset_100_epochs.pth
+```
+
+Where `/path/to/dataset` should have a directory structure like the following:
+
+```bash
+/path/to/dataset/
+    train/
+      class_0/
+        img_0.png
+        img_1.png
+    test/
+      class_0/
+        img_0.png
+        img_1.png
+```
+
 ## Generate samples
 
 ```bash
