@@ -165,8 +165,8 @@ def train_ddpm(
     avg_test_batch_loss = eval_epoch(model, test_dataloader, ns, device=device)
     print(f"\n\nTest Loss: {avg_test_batch_loss}")
     summary = TrainingSummary(
-        train_losses.cpu().detach().numpy(),
-        val_losses.cpu().detach().numpy(),
+        np.asarray(train_losses),
+        np.asarray(val_losses),
         avg_test_batch_loss.item(),
     )
 
