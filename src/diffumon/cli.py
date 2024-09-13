@@ -40,7 +40,7 @@ def main():
 )
 @click.option(
     "--batch-size",
-    default=1024,
+    default=256,
     type=int,
     help="Batch size for training the model",
 )
