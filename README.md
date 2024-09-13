@@ -64,7 +64,7 @@ diffumon sample --checkpoint-path checkpoints/fashion_mnist_100_epochs.pth --num
 * [What are Diffusion Models - By Lilian Weng](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/) - Math heavy blog post explaining the concept.
 * [Tutorial on Diffusion Models for Imaging and Vision](https://arxiv.org/pdf/2403.18103) - Tutorial by Stanley Chan which succinctly explains the math quite well.
 * [The Annotated Diffusion](https://huggingface.co/blog/annotated-diffusion) - Basic tutorial for diffusion which goes off lucidrain's PyTorch implementation. This was the most utilized reference for this project!
-* [*lucidrains*](https://github.com/lucidrains) - Ports Jonathan Ho's original code to PyTorch along with many of the original implementation's quirks. This was used as the primary code reference for this project.
+* [*lucidrains* denoising-diffusion-pytorch](https://github.com/lucidrains/denoising-diffusion-pytorch/tree/main) - Ports Jonathan Ho's original code to PyTorch along with many of the original implementation's quirks. This was used as the primary code reference for this project.
 
 ## Developer notes
 
