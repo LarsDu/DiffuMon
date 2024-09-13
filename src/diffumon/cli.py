@@ -125,6 +125,8 @@ def train(
                 )
                 test_dataset = ImageFolder(data_dir + "/test", transform=forward_t)
             case "pokemon":
+                # TODO: Switch over to 10x larger https://www.kaggle.com/datasets/yehongjiang/pokemon-sprites-images?resource=download
+                # OR from  https://raw.githubusercontent.com/jonasgrebe/tf-pokemon-generation/master/data/pokemon_sprite_dataset.7z
                 full_train_dataset, test_dataset = download_pokemon_sprites(
                     output_dir="downloads/pokemon_sprites", transform=forward_t
                 )
@@ -200,7 +202,7 @@ def train(
     help="Directory to save the generated samples",
 )
 @click.option(
-    "--model-path",
+    "--checkpoint-path",
     default="checkpoints/last_diffumon_checkpoint.pth",
     type=str,
     help="Path to the trained model",
