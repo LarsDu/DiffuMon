@@ -33,6 +33,8 @@ beautifulsoup4==4.12.3
 black==24.8.0
 bleach==6.1.0
     # via nbconvert
+brotli==1.1.0
+    # via py7zr
 certifi==2024.8.30
     # via httpcore
     # via httpx
@@ -92,6 +94,8 @@ idna==3.8
     # via httpx
     # via jsonschema
     # via requests
+inflate64==1.0.0
+    # via py7zr
 ipykernel==6.29.5
     # via jupyterlab
 ipython==8.27.0
@@ -159,6 +163,8 @@ mistune==3.0.2
     # via nbconvert
 mpmath==1.3.0
     # via sympy
+multivolumefile==0.2.3
+    # via py7zr
 mypy-extensions==1.0.0
     # via black
 nbclient==0.10.0
@@ -246,18 +252,27 @@ prompt-toolkit==3.0.47
     # via ipython
 psutil==6.0.0
     # via ipykernel
+    # via py7zr
 ptyprocess==0.7.0
     # via pexpect
     # via terminado
 pure-eval==0.2.3
     # via stack-data
+py7zr==0.22.0
+    # via diffumon
+pybcj==1.0.2
+    # via py7zr
 pycparser==2.22
     # via cffi
+pycryptodomex==3.20.0
+    # via py7zr
 pygments==2.18.0
     # via ipython
     # via nbconvert
 pyparsing==3.1.4
     # via matplotlib
+pyppmd==1.1.0
+    # via py7zr
 python-dateutil==2.9.0.post0
     # via arrow
     # via jupyter-client
@@ -274,6 +289,8 @@ pyzmq==26.2.0
     # via ipykernel
     # via jupyter-client
     # via jupyter-server
+pyzstd==0.16.1
+    # via py7zr
 referencing==0.35.1
     # via jsonschema
     # via jsonschema-specifications
@@ -311,6 +328,8 @@ sympy==1.13.2
 terminado==0.18.1
     # via jupyter-server
     # via jupyter-server-terminals
+texttable==1.7.0
+    # via py7zr
 tinycss2==1.3.0
     # via nbconvert
 tokenize-rt==6.0.0

@@ -8,7 +8,10 @@ from torch.utils.data import DataLoader, Dataset, random_split
 from torchvision import datasets
 from torchvision.datasets import ImageFolder
 
-from diffumon.data.downloader import download_pokemon_sprites
+from diffumon.data.downloader import (
+    download_pokemon_sprites,
+    download_pokemon_sprites_11k,
+)
 from diffumon.data.transforms import forward_transform
 from diffumon.diffusion.sampler import p_sampler_to_images
 from diffumon.models.unet import Unet
@@ -30,7 +33,7 @@ def main():
     "--preloaded",
     type=str,
     default="mnist",
-    help="Select a preloaded dataset which will be downloaded automatically. Can choose from ['pokemon', 'mnist', 'fashion_mnist']. Will override num_channels accoring to the dataset. NOTE: pokemon dataset is currently too small for effective sampling.",
+    help="Select a preloaded dataset which will be downloaded automatically. Can choose from ['mnist', 'fashion_mnist', 'pokemon_1k', 'pokemon_11k']. Will override num_channels accoring to the dataset. NOTE: pokemon dataset is currently too small for effective sampling.",
 )
 @click.option(
     "--num-epochs",
@@ -124,11 +127,14 @@ def train(
                     data_dir + "/train", transform=forward_t
                 )
                 test_dataset = ImageFolder(data_dir + "/test", transform=forward_t)
-            case "pokemon":
-                # TODO: Switch over to 10x larger https://www.kaggle.com/datasets/yehongjiang/pokemon-sprites-images?resource=download
-                # OR from  https://raw.githubusercontent.com/jonasgrebe/tf-pokemon-generation/master/data/pokemon_sprite_dataset.7z
+            case "pokemon_1k":
                 full_train_dataset, test_dataset = download_pokemon_sprites(
                     output_dir="downloads/pokemon_sprites", transform=forward_t
+                )
+                num_channels = 3
+            case "pokemon_11k":
+                full_train_dataset, test_dataset = download_pokemon_sprites_11k(
+                    output_dir="downloads/pokemon_sprites_11k", transform=forward_t
                 )
                 num_channels = 3
             case "mnist":

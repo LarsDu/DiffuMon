@@ -2,6 +2,7 @@
 """
 
 import gzip
+import hashlib
 import os
 import random
 import shutil
@@ -9,6 +10,7 @@ import tarfile
 from pathlib import Path
 from typing import Callable, Sequence
 
+import py7zr
 import requests
 from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
@@ -18,7 +20,10 @@ from diffumon.data.transforms import forward_transform
 
 
 def download_file(
-    url: str, output_file: str | Path, headers: dict[str, str] | None = None
+    url: str,
+    output_file: str | Path,
+    headers: dict[str, str] | None = None,
+    md5sum: str | None = None,
 ) -> None:
     """Download a file from a URL to a path
 
@@ -45,7 +50,16 @@ def download_file(
                 if data:
                     f.write(data)
                     pbar.update(len(data))
-
+    # Check the md5sum of the downloaded file
+    if md5sum is not None:
+        print(f"Checking md5sum of downloaded file...")
+        with open(output_file, "rb") as f:
+            data = f.read()
+            md5 = hashlib.md5(data).hexdigest()
+            if md5 != md5sum:
+                raise ValueError(
+                    f"MD5 checksum mismatch for downloaded file {output_file}. Expected {md5sum}, got {md5}"
+                )
     return output_file
 
 
@@ -113,12 +127,51 @@ def unpack_gzip(
         os.remove(gzip_file)
 
 
+def unpack_7z(
+    archive_file: str | Path,
+    output_dir: str | Path,
+    internal_dirs: list[Path] | None = None,
+    delete_archive: bool = False,
+) -> None:
+    """Unpack a 7z archive to a directory
+
+    Args:
+        archive_file: The path to the 7z archive to unpack
+        output_dir: The directory to unpack the archive to
+        internal_dirs: The specific internal directories to unpack. If None, unpack everything
+        delete_archive: Whether to delete the archive file after unpacking
+    """
+    archive_file = Path(archive_file)
+    output_dir = Path(output_dir)
+    # Create the output directory if it doesn't exist
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Use the py7zr library to extract the archive
+
+    with py7zr.SevenZipFile(archive_file, mode="r") as z:
+        target_files = []
+        if internal_dirs:
+            for file_info in z.list():
+                if any(
+                    str(file_info.filename).startswith(str(d)) for d in internal_dirs
+                ):
+                    target_files.append(file_info.filename)
+            z.extract(target_files, path=output_dir)
+        else:
+            z.extractall(output_dir)
+
+    if delete_archive and os.path.exists(archive_file):
+        print(f"Deleting archive file at {archive_file}")
+        os.remove(archive_file)
+
+
 def download_unpack_images(
     url: str,
     output_dir: str,
     internal_dirs: Sequence[Path | str] | None = None,
     delete_archive: bool = False,
     headers: dict[str, str] | None = None,
+    md5sum: str | None = None,
 ) -> None:
     """Download and unpack images from a URL
 
@@ -131,6 +184,7 @@ def download_unpack_images(
         delete_archive: Whether to delete the tarball or
             gzip after unpacking
         headers: Headers to pass to the request
+        md5sum: (Optional) The expected md5sum of the downloaded file
 
     Returns:
         The path to the output directory
@@ -149,7 +203,7 @@ def download_unpack_images(
     basename = os.path.basename(url)
     archive_file: Path = output_dir / basename
 
-    download_file(url, archive_file, headers=headers)
+    download_file(url, archive_file, headers=headers, md5sum=md5sum)
 
     # Unpack the archive to the staging directory
     if archive_file.name.endswith(".tar.gz"):
@@ -174,6 +228,13 @@ def download_unpack_images(
             delete_tarball=delete_archive,
             extension=".tar",
         )
+    elif archive_file.suffix == ".7z":
+        unpack_7z(
+            archive_file,
+            output_dir=output_dir,
+            internal_dirs=internal_dirs,
+            delete_archive=delete_archive,
+        )
     else:
         raise ValueError(f"Unsupported archive extension in {archive_file.name}")
 
@@ -183,7 +244,8 @@ def download_pokemon_sprites(
     transform: Callable | None = None,
     test_size: float = 0.15,
     output_dir: str | Path = "downloads/pokemon_sprites",
-    archive_image_path: str | Path = "sprites-2.0.0/sprites/pokemon",
+    internal_dirs: Sequence[str | Path] | None = ("sprites-2.0.0/sprites/pokemon",),
+    md5sum: str | None = "5068352117f3cc6e5641b7c5c426592c",
     split_seed: int = 1999,
     delete_archive: bool = True,
     delete_staging: bool = True,
@@ -198,8 +260,8 @@ def download_pokemon_sprites(
         test_size: The proportion of samples to use for the test set
         output_dir: The directory to save the downloaded dataset. Will create 'train' and 'test'
             subdirectories
-        archive_image_path: The path within the tarball to the images.
-            If specified, only unpack the images in this directory
+        internal_dirs: The paths within the tarball to the images.
+            If specified, only unpack the images in these directories
         split_seed: The seed to use for the random train/test split
         delete_archive: Whether to delete the downloaded files after unpacking
         delete_staging: Whether to delete the staging directory after completion
@@ -236,9 +298,10 @@ def download_pokemon_sprites(
     # Unpack only the contents of the 'archive_image_path' directory
     download_unpack_images(
         url,
-        internal_dirs=[archive_image_path],
+        internal_dirs=internal_dirs,
         output_dir=staging_dir,
         delete_archive=delete_archive,
+        md5sum=md5sum,
     )
 
     # Create the 'train' and 'test' directories
@@ -273,4 +336,34 @@ def download_pokemon_sprites(
     return (
         ImageFolder(train_dir, transform=transform),
         ImageFolder(test_dir, transform=transform),
+    )
+
+
+def download_pokemon_sprites_11k(
+    transform: Callable,
+    test_size: float = 0.15,
+    split_seed: int = 1999,
+) -> tuple[ImageFolder, ImageFolder]:
+    """Download the 11,000 Pokemon sprites dataset
+
+    NOTE: I think this dataset might actually be from https://www.kaggle.com/datasets/yehongjiang/pokemon-sprites-images?resource=download
+
+    TODO: May want to start hosting this somewhere else
+
+    Args:
+        transform: The transform to apply to the images
+        test_size: The proportion of samples to use for the test set
+        split_seed: The seed to use for the random train/test split
+
+    Returns:
+        The 'train' and 'test' ImageFolder datasets
+    """
+    return download_pokemon_sprites(
+        url="https://raw.githubusercontent.com/jonasgrebe/tf-pokemon-generation/master/data/pokemon_sprite_dataset.7z",
+        internal_dirs=None,
+        transform=transform,
+        test_size=test_size,
+        output_dir="downloads/pokemon_sprites_11k",
+        md5sum="f9e4d3d0d28b620579e0731115e8b30d24998b8c8bb0f5f3b9f8e4a5d4f1e2a0",
+        split_seed=split_seed,
     )
