@@ -66,8 +66,7 @@ def eval_epoch(
     total_batch_loss = 0
     # NOTE: Using ImageFolder, second discard term is labels
     for x0, _ in dataloader:
-        x0 = x0.to(model.device)
-        t_sample = torch.randn(x0.shape[0], device=model.device)
+        t_sample = torch.randn(x0.shape[0], device=x0.device)
         loss = loss_fn(model=model, x0=x0, t=t_sample, ns=ns)
         total_batch_loss += loss.item()
 
@@ -161,6 +160,7 @@ def train_ddpm(
             {
                 "model_state_dict": model.state_dict(),
                 "noise_schedule": pickle.dumps(ns),
+                "summary": pickle.dumps(summary),
             },
             f,
         )
