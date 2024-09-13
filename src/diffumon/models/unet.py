@@ -35,7 +35,6 @@ class PreNorm(nn.Module):
         return self.fn(x)
 
 
-@torch.compile
 class Unet(nn.Module):
     def __init__(
         self,
