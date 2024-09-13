@@ -51,6 +51,7 @@ def eval_epoch(
     model: nn.Module,
     dataloader: DataLoader,
     ns: NoiseSchedule,
+    device: torch.device | None = None,
 ) -> float:
     """Evaluate the model on the validation set
 
@@ -62,10 +63,13 @@ def eval_epoch(
     Returns:
         The average loss on the validation set
     """
+    if device is None:
+        device = get_device()
     model.eval()
     total_batch_loss = 0
     # NOTE: Using ImageFolder, second discard term is labels
     for x0, _ in dataloader:
+        x0 = x0.to(device)
         t_sample = torch.randint(
             low=0,
             high=ns.num_timesteps,
@@ -156,9 +160,9 @@ def train_ddpm(
         # Compute the average batch loss for the epoch
         train_losses.append(epoch_train_loss / len(train_dataloader))
         # Compute the average validation batch loss across the validation set
-        val_losses.append(eval_epoch(model, val_dataloader, ns))
+        val_losses.append(eval_epoch(model, val_dataloader, ns, device=device))
 
-    avg_test_batch_loss = eval_epoch(model, test_dataloader, ns)
+    avg_test_batch_loss = eval_epoch(model, test_dataloader, ns, device=device)
     print(f"\n\nTest Loss: {avg_test_batch_loss}")
     summary = TrainingSummary(
         np.array(train_losses), np.array(val_losses), avg_test_batch_loss.item

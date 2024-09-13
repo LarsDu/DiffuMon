@@ -20,7 +20,6 @@ def q_forward(
         Tuple of (x_t noised tensor, ground truth noise applied to x0)
     """
     noise = torch.randn_like(x0, device=x0.device)
-    print(t, t.dtype)
     # Select the ts in your batch sample
     return (
         x0 + ns.sqrt_alphas_cum_prod[t].view(-1, 1, 1, 1) * noise,
