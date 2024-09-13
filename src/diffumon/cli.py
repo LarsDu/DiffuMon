@@ -226,8 +226,6 @@ def sample(
     num_samples: int,
     output_dir: str,
     checkpoint_path: str,
-    img_dim: int,
-    num_channels: int,
     device: str | None,
     seed: int,
 ) -> None:
