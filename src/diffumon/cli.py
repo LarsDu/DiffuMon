@@ -24,18 +24,18 @@ def main():
 @click.option(
     "--preloaded-data",
     type=str,
-    default=None,
+    default="pokemon",
     help="(Optional) alternate to data-dir, select a preloaded dataset which will be downloaded automatically. Can choose from ['pokemon', 'mnist']. Will override num_channels accoring to the dataset",
 )
 @click.option(
     "--num-epochs",
-    default=128,
+    default=512,
     type=int,
     help="Number of epochs to train the model",
 )
 @click.option(
     "--batch-size",
-    default=320,
+    default=480,
     type=int,
     help="Batch size for training the model",
 )
@@ -96,6 +96,8 @@ def train(
     if preloaded_data:
         print(f"Downloading and unpacking {preloaded_data} dataset...")
         match preloaded_data:
+            # FIXME: Return dataloaders instead of directories
+            # FIXME: MNIST data does not use ImageFolder
             case "pokemon":
                 train_dir, test_dir = download_pokemon_sprites(
                     output_dir="downloads/pokemon_sprites"
