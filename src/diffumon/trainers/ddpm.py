@@ -126,7 +126,11 @@ def train_ddpm(
             # Sample a set of timesteps equal to batch size
             batch_size = x0.shape[0]
             t_sample = torch.randint(
-                low=0, high=ns.num_timesteps, size=(batch_size,), device=device
+                low=0,
+                high=ns.num_timesteps,
+                size=(batch_size,),
+                device=device,
+                dtype=torch.long,
             )
 
             # Compute the loss
