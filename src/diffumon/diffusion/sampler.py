@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Sequence
+from typing import Callable, Sequence
 
 import torch
 from PIL.Image import Image as PILImage
@@ -88,9 +88,10 @@ def p_sampler_to_images(
     sample_batch = p_sampler(
         model=model, ns=ns, dims=dims, num_samples=num_samples, seed=seed
     )
-
+    # Get the compose transform Callable
+    reverse_transform_func: Callable = reverse_transform()
     # convert each image in the batch individually to a PIL image
-    pil_images: list[PILImage] = [reverse_transform(x0) for x0 in sample_batch]
+    pil_images: list[PILImage] = [reverse_transform_func(x0) for x0 in sample_batch]
 
     if output_dir is not None:
         output_dir = Path(output_dir)
