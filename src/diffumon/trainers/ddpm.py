@@ -79,7 +79,6 @@ def train_ddpm(
     test_dataloader: DataLoader,
     num_epochs: int,
     lr: float = 1e-4,
-    seed: int = 1999,
     num_timesteps: int = 1000,
     noise_option: NoiseScheduleOption = NoiseScheduleOption.COSINE,
     show_loss_every: int = 100,
@@ -104,12 +103,12 @@ def train_ddpm(
         The trained model and the training summary
 
     """
-    model.set_device(get_device())
-    torch.set_random_seed(seed)
+    device = get_device()
+    model.to(device)
     model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     ns = create_noise_schedule(
-        timesteps=num_timesteps, option=noise_option, device=model.device
+        timesteps=num_timesteps, option=noise_option, device=device
     )
 
     train_losses = []
@@ -118,11 +117,14 @@ def train_ddpm(
         epoch_train_loss = 0
         # NOTE: Using ImageFolder, second discard term is labels
         for i, (x0, _) in enumerate(train_dataloader):
-            x0 = x0.to(model.device)
+            x0 = x0.to(device)
             optimizer.zero_grad()
 
             # Sample a set of timesteps equal to batch size
-            t_sample = torch.randn(x0.shape[0], device=model.device)
+            batch_size = x0.shape[0]
+            t_sample = torch.randint(
+                low=0, high=ns.num_timesteps, size=(batch_size,), device=device
+            )
 
             # Compute the loss
             loss = loss_fn(model, x0, t_sample, ns)

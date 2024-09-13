@@ -47,7 +47,9 @@ def train_ddpm_entrypoint(
         Trained denoiser nn.Module model, TrainingSummary
 
     """
+    # Set the seed before data loading
     torch.manual_seed(seed)
+
     # Setup the forward and reverse transforms
     # H, W
     forward_t = forward_transform((img_dim, img_dim))
@@ -69,16 +71,13 @@ def train_ddpm_entrypoint(
         dim=img_dim,
         num_channels=num_channels,
     )
-    model.to(get_device())
-
     model, training_summary = train_ddpm(
+        model=model,
         train_dataloader=train_dataloader,
         test_dataloader=test_dataloader,
         val_dataloader=val_dataloader,
         num_epochs=num_epochs,
-        batch_size=batch_size,
         checkpoint_path=checkpoint_path,
         num_timesteps=num_timesteps,
-        seed=seed,
     )
     return model, training_summary
