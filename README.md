@@ -4,6 +4,12 @@ Basic Denoising Diffusion Probabilistic Model image generator implemented in PyT
 
 Developed as an educational project, with a much simpler PyTorch implementation than other diffusion oriented projects.
 
+## Example Generations
+
+![Fashion MNIST](static/example_fashion_mnist.png)
+**Fashion MNIST sample generations**
+
+
 ## Getting started
 
 ## Setting up environment
@@ -83,4 +89,14 @@ It's strongly recommended to install pre-commit hooks to ensure code consistency
 
 ```bash
 pre-commit install
+```
+
+### Jupyter notebooks
+
+There are also example notebook(s) in the `notebooks/` directory.
+
+Make sure to install the `diffumon` kernel in Jupyter to run the notebooks.
+
+```bash
+python -m ipykernel install --user --name diffumon --display-name "Python Diffumon"
 ```

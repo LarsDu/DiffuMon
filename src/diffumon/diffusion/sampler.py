@@ -71,7 +71,7 @@ def p_sampler_to_images(
     model: nn.Module,
     ns: NoiseSchedule,
     num_samples: int,
-    dims: Sequence[int],
+    chw_dims: Sequence[int],
     seed: int,
     output_dir: str | Path | None,
     device: torch.device | None = None,
@@ -93,7 +93,12 @@ def p_sampler_to_images(
         device = get_device()
     # Create a batch of synthetic samples [b, c, h, w]
     sample_batch = p_sampler(
-        model=model, ns=ns, dims=dims, num_samples=num_samples, seed=seed, device=device
+        model=model,
+        ns=ns,
+        dims=chw_dims,
+        num_samples=num_samples,
+        seed=seed,
+        device=device,
     )
     # Get the compose transform Callable
     reverse_transform_func: Callable = reverse_transform()

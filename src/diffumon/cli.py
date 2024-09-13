@@ -16,7 +16,7 @@ from diffumon.data.transforms import forward_transform
 from diffumon.diffusion.sampler import p_sampler_to_images
 from diffumon.models.unet import Unet
 from diffumon.trainers.ddpm import train_ddpm
-from diffumon.utils import get_device
+from diffumon.utils import get_device, load_unet_checkpoint
 
 
 # Setup the CLI
@@ -213,19 +213,6 @@ def train(
     type=str,
     help="Path to the trained model",
 )
-# TODO: Store the image dimensions and channels in the model
-@click.option(
-    "--img-dim",
-    type=int,
-    default=28,
-    help="Resize images to this height and width",
-)
-@click.option(
-    "--num-channels",
-    default=1,
-    type=int,
-    help="Number of channels in the images",
-)
 @click.option(
     "--device",
     default=None,
@@ -249,20 +236,9 @@ def sample(
     if device is None:
         device = get_device()
 
-    # Load the trained model
-    print(f"Loading trained model from {checkpoint_path}...")
-    with open(checkpoint_path, "rb") as f:
-        checkpoint = torch.load(f)
-
-    noise_schedule = pickle.loads(checkpoint["noise_schedule"])
-
-    model = Unet(
-        dim=img_dim,
-        num_channels=num_channels,
+    model, noise_schedule, chw_dims = load_unet_checkpoint(
+        checkpoint_path, device=device
     )
-    model.load_state_dict(checkpoint["model_state_dict"])
-    model.to(device)
-    noise_schedule.to(device)
 
     print("Generating samples...")
     # NOTE: sampler set to eval mode, no gradients
@@ -271,7 +247,7 @@ def sample(
         model=model,
         ns=noise_schedule,
         num_samples=num_samples,
-        dims=(num_channels, img_dim, img_dim),
+        chw_dims=chw_dims,
         seed=seed,
         output_dir=output_dir,
         device=device,
