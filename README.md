@@ -5,7 +5,7 @@ Basic Denoising Diffusion Probabilistic Model image generator implemented in PyT
 
 ## Getting started
 
-### Setting up environment
+## Setting up environment
 
 This repo uses [`rye`](https://rye.astral.sh/guide/installation/) as the package/environment manager
 
@@ -20,7 +20,7 @@ rye sync
 ```
 
 
-### Access the entrypoint
+## Access the entrypoint
 
 Once installed, the model can be trained and used via the `diffumon` command
 
@@ -28,22 +28,29 @@ Once installed, the model can be trained and used via the `diffumon` command
 diffumon --help
 ```
 
-### Train a model
-
+## Train a model
 
 ```bash
 diffumon train --help
 ```
 
+### Train a fashion MNIST model for 512 epochs
+
 ```bash
-diffumon train --preloaded mnist --num-epochs 15
+diffumon train --preloaded fashion_mnist --num-epochs 512 --checkpoint-path checkpoints/fashion_mnist_512_epochs.pth
 ```
 
 
-### Generate samples
+## Generate samples
 
 ```bash
 diffumon sample --help
+```
+
+### Generate 32 samples from the trained fashion MNIST model
+
+```bash
+diffumon sample --checkpoint-path checkpoints/fashion_mnist_512_epochs.pth --num-samples 32 --num-channels 1 --img-dim 28 
 ```
 
 ## Developer notes
