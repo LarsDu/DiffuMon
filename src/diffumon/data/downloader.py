@@ -7,10 +7,14 @@ import random
 import shutil
 import tarfile
 from pathlib import Path
-from typing import Sequence
+from typing import Callable, Sequence
 
 import requests
+from torch.utils.data import Dataset
+from torchvision.datasets import ImageFolder
 from tqdm import tqdm
+
+from diffumon.data.transforms import forward_transform
 
 
 def download_file(
@@ -176,19 +180,21 @@ def download_unpack_images(
 
 def download_pokemon_sprites(
     url: str = "https://github.com/PokeAPI/sprites/archive/refs/tags/2.0.0.tar.gz",
+    transform: Callable | None = None,
     test_size: float = 0.15,
     output_dir: str | Path = "downloads/pokemon_sprites",
     archive_image_path: str | Path = "sprites-2.0.0/sprites/pokemon",
     split_seed: int = 1999,
     delete_archive: bool = True,
     delete_staging: bool = True,
-) -> tuple[Path, Path]:
+) -> tuple[Dataset, Dataset]:
     """Download a pokemon sprite dataset
 
     Partition the dataset into 'train' and 'test' subdirectories
 
     Args:
         url: The URL to download the dataset
+        transform: The transform to apply to the images
         test_size: The proportion of samples to use for the test set
         output_dir: The directory to save the downloaded dataset. Will create 'train' and 'test'
             subdirectories
@@ -199,10 +205,13 @@ def download_pokemon_sprites(
         delete_staging: Whether to delete the staging directory after completion
 
     Returns:
-        The paths to the 'train' and 'test' subdirectories
+        The 'train' and 'test' ImageFolder datasets
     """
     output_dir = Path(output_dir)
     archive_image_path = Path(archive_image_path)
+
+    if transform is None:
+        transform = forward_transform()
 
     # Split the images into 'train' and 'test' subdirectories
     train_dir = output_dir / "train"
@@ -258,22 +267,22 @@ def download_pokemon_sprites(
     if delete_staging:
         shutil.rmtree(staging_dir)
 
-    return train_dir, test_dir
-
-
-"""
-    ref: https://stackoverflow.com/questions/60548000
-"""
+    return (
+        ImageFolder(train_dir, transform=transform),
+        ImageFolder(test_dir, transform=transform),
+    )
 
 
 def download_mnist(
     train_url: str = "https://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
     test_url: str = "https://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
     output_dir: str | Path = "downloads/mnist",
-    delete_archives: bool = True,
-) -> tuple[Path, Path]:
+) -> tuple[Dataset, Dataset]:
     """Download the MNIST dataset
     Partition the 60,000 train, 10,000 test samples into 'train' and 'test' subdirectories
+
+    Slight issue with 403 forbidden error when downloading from the original source
+    ref: https://stackoverflow.com/questions/60548000
 
     Args:
         train_url: The URL to download the training set
@@ -286,12 +295,6 @@ def download_mnist(
 
     # Enforce Path type for consistency
     output_dir = Path(output_dir)
-
-    # Download the tarball to the staging directory
-    staging_dir = output_dir / "staging"
-
-    # Create the staging directory if it doesn't exist
-    staging_dir.mkdir(parents=True, exist_ok=True)
 
     # Create train and test directories
     train_dir = output_dir / "train"
@@ -310,21 +313,14 @@ def download_mnist(
     lecunn_header = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
     }
-    # Download the tarball from url to staging dir
-    download_unpack_images(
-        train_url,
-        internal_dirs=None,  # Unpack the whole thing
-        output_dir=train_dir / "class_0",
-        delete_archive=delete_archives,
-        headers=lecunn_header,
+
+    # Download the training set
+    train_archive = download_file(
+        train_url, output_dir / os.path.basename(train_url), headers=lecunn_header
     )
 
-    download_unpack_images(
-        test_url,
-        internal_dirs=None,  # Unpack the whole thing
-        output_dir=test_dir / "class_0",
-        delete_archive=delete_archives,
-        headers=lecunn_header,
+    test_archive = download_file(
+        test_url, output_dir / os.path.basename(test_url), headers=lecunn_header
     )
 
     return train_dir, test_dir

@@ -1,13 +1,16 @@
 import pickle
-from pathlib import Path
 
 import click
 import torch
+from torch import nn
+from torch.utils.data import DataLoader, Dataset, random_split
+from torchvision.datasets import ImageFolder
 
-from diffumon.data.downloader import download_mnist, download_pokemon_sprites
+from diffumon.data.downloader import download_pokemon_sprites
+from diffumon.data.transforms import forward_transform
 from diffumon.diffusion.sampler import p_sampler_to_images
 from diffumon.models.unet import Unet
-from diffumon.trainers.ddpm_entrypoint import train_ddpm_entrypoint
+from diffumon.trainers.ddpm import train_ddpm
 from diffumon.utils import get_device
 
 
@@ -71,6 +74,12 @@ def main():
     help="Number of channels in the images",
 )
 @click.option(
+    "--validation-size",
+    default=0.15,
+    type=float,
+    help="Proportion of the training set to use for validation",
+)
+@click.option(
     "--seed",
     default=1999,
     type=int,
@@ -85,44 +94,78 @@ def train(
     num_timesteps: int,
     img_dim: int,
     num_channels: int,
+    validation_size: float,
     seed: int,
 ) -> None:
     # Code for training diffumon
     print("Training diffumon...")
 
+    # Set the random seed for reproducibility
+    torch.manual_seed(seed)
+
+    forward_t = forward_transform(img_dim)
+
     # Get the train and test directories
-    train_dir: Path
-    test_dir: Path
+    full_train_dataset: Dataset
+    test_dataset: Dataset
     if preloaded_data:
         print(f"Downloading and unpacking {preloaded_data} dataset...")
         match preloaded_data:
             # FIXME: Return dataloaders instead of directories
             # FIXME: MNIST data does not use ImageFolder
+            case "custom":
+                if data_dir is None:
+                    raise ValueError("data-dir must be provided for custom dataset")
+                full_train_dataset = ImageFolder(
+                    data_dir + "/train", transform=forward_t
+                )
+                test_dataset = ImageFolder(data_dir + "/test", transform=forward_t)
             case "pokemon":
-                train_dir, test_dir = download_pokemon_sprites(
-                    output_dir="downloads/pokemon_sprites"
+                full_train_dataset, test_dataset = download_pokemon_sprites(
+                    output_dir="downloads/pokemon_sprites", transform=forward_t
                 )
                 num_channels = 3
             case "mnist":
-                train_dir, test_dir = download_mnist(output_dir="downloads/mnist")
+                raise NotImplementedError("MNIST auto download is not yet supported")
+                """
+                full_train_dataset, test_dataset = download_mnist(
+                    output_dir="downloads/mnist", transform = forward_t
+                )
                 num_channels = 1
+                """
+            case "fashion_mnist":
+                raise NotImplementedError(
+                    "Fashion MNIST auto download is not yet supported"
+                )
+                """
+                full_train_dataset, test_dataset = download_fashion(
+                    output_dir="downloads/fashion_mnist", transform=forward_t
+                )
+                num_channels = 1
+                """
             case _:
                 raise ValueError(f"Unsupported preloaded datas {preloaded_data}")
         print(f"num_channels changed to {num_channels} for {preloaded_data} dataset")
-    else:
-        train_dir = Path(data_dir) / "train"
-        test_dir = Path(data_dir) / "test"
 
-    train_ddpm_entrypoint(
-        train_dir=train_dir,
-        test_dir=test_dir,
-        img_dim=img_dim,
-        num_channels=num_channels,
-        num_timesteps=num_timesteps,
+    # Split full train into train and validation
+    train_dataset, val_dataset = random_split(
+        full_train_dataset, [1 - validation_size, validation_size]
+    )
+    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+
+    _, _ = train_ddpm(
+        model=Unet(
+            dim=img_dim,
+            num_channels=num_channels,
+        ),
+        train_dataloader=train_dataloader,
+        test_dataloader=test_dataloader,
+        val_dataloader=val_dataloader,
         num_epochs=num_epochs,
-        batch_size=batch_size,
         checkpoint_path=checkpoint_path,
-        seed=seed,
+        num_timesteps=num_timesteps,
     )
 
 
