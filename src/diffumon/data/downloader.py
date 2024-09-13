@@ -13,14 +13,18 @@ import requests
 from tqdm import tqdm
 
 
-def download_file(url: str | Path, output_path: str) -> None:
+def download_file(url: str, output_path: str) -> None:
     """Download a file from a URL to a path
 
     Args:
         url: The URL to download the file from
         output_path: The path to save the downloaded file
     """
-    url = Path(url)
+    # Skip if already downloaded
+    if Path(output_path).exists():
+        print(f"Found existing file at {output_path}")
+        return
+
     print(f"Downloading {url} to {output_path}")
     with requests.get(url, stream=True) as r:
         total_size = int(r.headers.get("content-length", 0))
@@ -42,7 +46,7 @@ def unpack_tarball(
     output_dir: str | Path,
     internal_dirs: list[Path],
     delete_tarball: bool = False,
-    extension: str = "gz",
+    extension: str = "tar.gz",
 ) -> None:
     """Unpack a tarball to a directory
 
@@ -54,12 +58,18 @@ def unpack_tarball(
         extension: The extension of the tarball
     """
     tarball_path = Path(tarball_path)
+    output_dir = Path(output_dir)
+    # Create the output directory if it doesn't exist
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     with tarfile.open(tarball_path, f"r:{extension}") as tar:
         if internal_dirs:
+            members_to_extract = []
             # Extract only the specified internal directories
             for member in tar.getmembers():
                 if any(str(member).startswith(str(d)) for d in internal_dirs):
-                    tar.extract(member, output_dir)
+                    members_to_extract.append(member)
+            tar.extractall(path=output_dir, members=members_to_extract)
         else:
             # Extract everything
             tar.extractall(output_dir)
@@ -70,7 +80,6 @@ def unpack_tarball(
 
 def unpack_gzip(
     gzip_file: str | Path,
-    internal_dirs: list[Path] | None,
     output_dir: str | Path,
     delete_gzip: bool = False,
 ) -> None:
@@ -79,7 +88,6 @@ def unpack_gzip(
     Args:
         gzip_file: The path to the gzip file to unpack
         output_dir: The path to save the unpacked file
-        internal_dirs: The specific internal directories to unpack. If None, unpack everything
         delete_gzip: Whether to delete the gzip file after unpacking
     """
     gzip_file = Path(gzip_file)
@@ -87,22 +95,14 @@ def unpack_gzip(
 
     with gzip.open(gzip_file, "rb") as f_in:
         with open(output_dir, "wb") as f_out:
-
-            if internal_dirs:
-                # Extract only the specified internal directories
-                for line in f_in:
-                    if any(str(line).startswith(str(d)) for d in internal_dirs):
-                        f_out.write(line)
-            else:
-                # Extract everything
-                shutil.copyfileobj(f_in, f_out)
+            shutil.copyfileobj(f_in, f_out)
 
     if delete_gzip:
         os.remove(gzip_file)
 
 
 def download_unpack_images(
-    url: str | Path,
+    url: str,
     output_dir: str,
     internal_dirs: Sequence[Path | str] | None = None,
     delete_archive: bool = False,
@@ -123,7 +123,6 @@ def download_unpack_images(
     """
 
     # Enforce Path type for consistency
-    url = Path(url)
     output_dir = Path(output_dir)
     if internal_dirs:
         internal_dirs = [Path(d) for d in internal_dirs]
@@ -132,24 +131,25 @@ def download_unpack_images(
     os.makedirs(output_dir, exist_ok=True)
 
     # Download the tarball from url to output_dir
-    archive_file: Path = output_dir / url.name
+    # Extract basename from url
+    basename = os.path.basename(url)
+    archive_file: Path = output_dir / basename
     download_file(url, archive_file)
 
     # Unpack the archive to the staging directory
-    if archive_file.suffix == ".gz":
-        unpack_gzip(
-            archive_file,
-            internal_dirs=internal_dirs,
-            output_dir=output_dir,
-            delete_gzip=delete_archive,
-        )
-    elif archive_file.suffix == ".tar.gz":
+    if archive_file.suffix == ".tar.gz":
         unpack_tarball(
             archive_file,
             output_dir=output_dir,
             internal_dirs=internal_dirs,
             delete_tarball=delete_archive,
             extension=".tar.gz",
+        )
+    elif archive_file.suffix == ".gz":
+        unpack_gzip(
+            archive_file,
+            output_dir=output_dir,
+            delete_gzip=delete_archive,
         )
     elif archive_file.suffix == ".tar":
         unpack_tarball(
@@ -200,7 +200,7 @@ def download_pokemon_sprites(
     # Download the tarball from url to staging dir
     download_unpack_images(
         url,
-        archive_image_path=archive_image_path,
+        internal_dirs=[archive_image_path],
         output_dir=staging_dir,
         delete_archive=delete_archive,
     )
@@ -241,10 +241,8 @@ def download_pokemon_sprites(
 
 
 def download_mnist(
-    train_url: (
-        str | Path
-    ) = "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
-    test_url: str | Path = "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
+    train_url: str = "https://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
+    test_url: str = "https://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
     output_dir: str | Path = "downloads/mnist",
     delete_archives: bool = True,
 ) -> tuple[Path, Path]:
@@ -261,8 +259,6 @@ def download_mnist(
     """
 
     # Enforce Path type for consistency
-    test_url = Path(test_url)
-    train_url = Path(train_url)
     output_dir = Path(output_dir)
 
     # Download the tarball to the staging directory
