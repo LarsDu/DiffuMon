@@ -46,10 +46,6 @@ diffumon train --preloaded-data pokemon --num-epochs 128
 diffumon sample --help
 ```
 
-### Notebook
-
-Also included is a notebook that demonstrates the usage of the model under notebooks/diffumon.ipynb
-
 ## Developer notes
 
 `black`, `ruff`, `isort`, and `pre-commit` should come as preinstalled dev developer packages in the virtual environment.

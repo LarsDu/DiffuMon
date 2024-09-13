@@ -5,6 +5,9 @@ dev_notebooks/
 checkpoints/
 downloads/
 
+# Generated samples
+samples/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
