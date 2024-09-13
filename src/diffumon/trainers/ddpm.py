@@ -44,7 +44,7 @@ def loss_fn(
 
     xt, true_noise = q_forward(x0, t, ns)
     pred_noise = model(xt, t)
-    return F.smooth_l1_loss(pred_noise, true_noise)
+    return F.mse_loss(pred_noise, true_noise)
 
 
 @torch.no_grad()
