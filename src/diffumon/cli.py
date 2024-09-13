@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 import torch
 
-from diffumon.data.downloader import download_mnist, download_pokemon
+from diffumon.data.downloader import download_mnist, download_pokemon_sprites
 from diffumon.diffusion.sampler import p_sampler_to_images
 from diffumon.models.unet import Unet
 from diffumon.trainers.ddpm_entrypoint import train_ddpm_entrypoint
@@ -97,7 +97,7 @@ def train(
         print(f"Downloading and unpacking {preloaded_data} dataset...")
         match preloaded_data:
             case "pokemon":
-                train_dir, test_dir = download_pokemon(
+                train_dir, test_dir = download_pokemon_sprites(
                     output_dir="downloads/pokemon_sprites"
                 )
                 num_channels = 3
