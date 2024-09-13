@@ -11,8 +11,8 @@ from torch import Tensor, nn
 
 from diffumon.models.attention import Attention, LinearAttention
 from diffumon.models.helpers import Downsample, Upsample, default
-from diffumon.models.positional_embed import SinusoidalPositionEmbeddings
 from diffumon.models.resnet import ResnetBlock
+from diffumon.models.sinusoidal_pos_emb import SinusoidalPosEmb
 
 
 class Residual(nn.Module):
