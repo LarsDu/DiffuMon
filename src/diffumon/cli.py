@@ -34,7 +34,7 @@ def main():
 )
 @click.option(
     "--num-epochs",
-    default=15,
+    default=8,
     type=int,
     help="Number of epochs to train the model",
 )

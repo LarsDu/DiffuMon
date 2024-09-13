@@ -36,7 +36,7 @@ diffumon train --help
 ```
 
 ```bash
-diffumon train --preloaded-data mnist --num-epochs 15
+diffumon train --preloaded mnist --num-epochs 15
 ```
 
 

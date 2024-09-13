@@ -1,3 +1,4 @@
+import os
 import pickle
 
 import numpy as np
@@ -172,6 +173,9 @@ def train_ddpm(
         val_losses=np.asarray(val_losses),
         test_loss=avg_test_batch_loss,
     )
+
+    if not os.path.exists(os.path.dirname(checkpoint_path)):
+        os.makedirs(os.path.dirname(checkpoint_path))
 
     # Checkpoint the model and noise schedule
     with open(checkpoint_path, "wb") as f:
