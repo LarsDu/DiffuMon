@@ -22,21 +22,22 @@ def download_file(url: str, output_file: str | Path) -> None:
     """
     output_file = Path(output_file)
     # Skip if already downloaded
-    if output_file.exists():
+    if os.path.exists(output_file):
         print(f"Found existing file at {output_file}")
         return
 
     print(f"Downloading {url} to {output_file}")
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
+        pbar = tqdm(total=int(r.headers["Content-Length"]))
         with open(output_file, "wb") as f:
             # Show progress bar for the download
             # ref: https://stackoverflow.com/questions/56795229
-            pbar = tqdm(total=int(r.headers["Content-Length"]))
+
             for data in r.iter_content(chunk_size=1024):
                 if data:
                     f.write(data)
-                    pbar.update(len(data))
+                    # pbar.update(len(data))
 
     return output_file
 
@@ -66,15 +67,18 @@ def unpack_tarball(
         if internal_dirs:
             members_to_extract = []
             # Extract only the specified internal directories
+
             for member in tar.getmembers():
-                if any(str(member).startswith(str(d)) for d in internal_dirs):
+                if any(str(member.name).startswith(str(d)) for d in internal_dirs):
+                    # print(f"Extracting {member.name}")
                     members_to_extract.append(member)
+            print(members_to_extract)
             tar.extractall(path=output_dir, members=members_to_extract)
         else:
             # Extract everything
             tar.extractall(output_dir)
 
-    if delete_tarball and tarball_path.exists():
+    if delete_tarball and os.path.exists(tarball_path):
         print(f"Deleting tarball at {tarball_path}")
         os.remove(tarball_path)
 
@@ -137,7 +141,6 @@ def download_unpack_images(
     basename = os.path.basename(url)
     archive_file: Path = output_dir / basename
 
-    print(archive_file.suffix)
     download_file(url, archive_file)
 
     # Unpack the archive to the staging directory
@@ -199,6 +202,7 @@ def download_pokemon_sprites(
     staging_dir.mkdir(parents=True, exist_ok=True)
 
     # Download the tarball from url to staging dir
+    # Unpack only the contents of the 'archive_image_path' directory
     download_unpack_images(
         url,
         internal_dirs=[archive_image_path],
@@ -211,7 +215,7 @@ def download_pokemon_sprites(
     test_dir = output_dir / "test"
 
     # Short circuit if these directories already exist
-    if train_dir.exists() and test_dir.exists():
+    if os.path.exists(train_dir) and os.path.exists(test_dir):
         print(f"Found existing train and test directories in {output_dir}")
         print("Skipping download and unpacking...")
         return train_dir, test_dir
@@ -221,7 +225,7 @@ def download_pokemon_sprites(
     os.makedirs(test_dir, exist_ok=True)
 
     # Randomly select images for the test set
-    images = list(staging_dir.glob("*"))
+    images = list((staging_dir / archive_image_path).glob("*"))
     random.seed(split_seed)
     random.shuffle(images)
     # The first test_size proportion of images are for the test set
@@ -229,10 +233,18 @@ def download_pokemon_sprites(
     # The remaining images are for the training set
     train_images = images[int(test_size * len(images)) :]
 
+    print(
+        f"Randomly partitioning images into {len(train_images)} train and {len(test_images)} test samples with seed {split_seed}"
+    )
+    print(images)
     # Copy the images to the 'train' and 'test' directories
     for img in train_images:
+        if img.is_dir():
+            continue
         shutil.copy(img, train_dir / img.name)
     for img in test_images:
+        if img.is_dir():
+            continue
         shutil.copy(img, test_dir / img.name)
 
     if delete_staging:
