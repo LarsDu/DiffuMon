@@ -2,12 +2,13 @@ from pathlib import Path
 from typing import Sequence
 
 import torch
-from PIL import Image
+from PIL import PILImage
 from torch import Tensor, nn
 from tqdm import tqdm
 
 from diffumon.data.transforms import reverse_transform
 from diffumon.diffusion.scheduler import NoiseSchedule
+from diffumon.utils import get_device
 
 
 @torch.no_grad()
@@ -17,6 +18,7 @@ def p_sampler(
     dims: Sequence[int],
     num_samples: int,
     seed: int,
+    device: torch.device | None = None,
 ) -> Tensor:
     """Sample from the model's prior distribution.
 
@@ -32,11 +34,21 @@ def p_sampler(
         The generated samples as a single [b, c, h, w] tensor
     """
     torch.manual_seed(seed)
-    img_batch_dims = [num_samples] + dims
-    x_t = torch.randn(*img_batch_dims, device=model.device)
+    if device is None:
+        device = get_device()
+
+    img_batch_dims = [num_samples] + list(dims)
+
+    # Generate random starting noise at max timestep
+    x_t = torch.randn(*img_batch_dims, device=device)
+
     model.eval()
+
+    # Denoise the image using the noise prediction model
     for t in reversed(range(ns.num_timesteps)):
+
         # Reshape time index to batch size so all samples are at the same timestep
+        # TODO: Refactor this into a separate function to make it easier to make examples
         t_batch = torch.full((num_samples,), t, device=model.device)
         x_t = ns.sqrt_recip_alphas[t] * (
             x_t
@@ -45,6 +57,7 @@ def p_sampler(
 
         if t > 0:
             # TODO: Consider caching the sqrt posterior_variance
+            # TODO: Consider adding option to use betas[t].sqrt() here
             x_t += ns.posterior_variance[t].sqrt() * torch.randn_like(x_t)
 
     return x_t
@@ -57,7 +70,7 @@ def p_sampler_to_images(
     dims: Sequence[int],
     seed: int,
     output_dir: str | Path | None,
-) -> list[Image]:
+) -> list[PILImage]:
     """Sample from the model's prior distribution and convert to images.
 
     Args:
@@ -77,7 +90,7 @@ def p_sampler_to_images(
     )
 
     # convert each image in the batch individually to a PIL image
-    pil_images: list[Image] = [reverse_transform(x0) for x0 in sample_batch]
+    pil_images: list[PILImage] = [reverse_transform(x0) for x0 in sample_batch]
 
     if output_dir is not None:
         output_dir = Path(output_dir)
