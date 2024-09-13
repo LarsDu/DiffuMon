@@ -11,7 +11,6 @@ from diffumon.diffusion.scheduler import NoiseSchedule
 
 
 @torch.no_grad()
-@torch.compile
 def p_sampler(
     model: nn.Module,
     ns: NoiseSchedule,

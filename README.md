@@ -35,6 +35,11 @@ diffumon --help
 diffumon train --help
 ```
 
+```bash
+diffumon train --preloaded-data pokemon --num-epochs 128
+```
+
+
 ### Generate samples
 
 ```bash
