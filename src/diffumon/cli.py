@@ -58,7 +58,7 @@ def main():
 )
 @click.option(
     "--num-timesteps",
-    default=300,
+    default=1000,
     type=int,
     help="Number of timesteps in the diffusion process",
 )
