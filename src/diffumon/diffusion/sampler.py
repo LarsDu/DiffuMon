@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Sequence
 
+import PIL.Image.Image as PILImage
 import torch
-from PIL import PILImage
 from torch import Tensor, nn
 from tqdm import tqdm
 
