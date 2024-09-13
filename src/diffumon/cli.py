@@ -27,20 +27,20 @@ def main():
 
 @main.command(help="Train the diffumon denoising diffusion model")
 @click.option(
-    "--preloaded-data",
+    "--preloaded",
     type=str,
     default="mnist",
-    help="(Optional) alternate to data-dir, select a preloaded dataset which will be downloaded automatically. Can choose from ['pokemon', 'mnist']. Will override num_channels accoring to the dataset",
+    help="Select a preloaded dataset which will be downloaded automatically. Can choose from ['pokemon', 'mnist', 'fashion_mnist']. Will override num_channels accoring to the dataset. NOTE: pokemon dataset is currently too small for effective sampling.",
 )
 @click.option(
     "--num-epochs",
-    default=512,
+    default=15,
     type=int,
     help="Number of epochs to train the model",
 )
 @click.option(
     "--batch-size",
-    default=512,
+    default=1024,
     type=int,
     help="Batch size for training the model",
 )
@@ -88,7 +88,7 @@ def main():
     help="Random seed for training the model",
 )
 def train(
-    preloaded_data: str | None,
+    preloaded: str | None,
     num_epochs: int,
     batch_size: int,
     data_dir: str | None,
@@ -110,11 +110,9 @@ def train(
     # Get the train and test directories
     full_train_dataset: Dataset
     test_dataset: Dataset
-    if preloaded_data:
-        print(f"Downloading and unpacking {preloaded_data} dataset...")
-        match preloaded_data:
-            # FIXME: Return dataloaders instead of directories
-            # FIXME: MNIST data does not use ImageFolder
+    if preloaded:
+        print(f"Downloading and unpacking {preloaded} dataset...")
+        match preloaded:
             case "custom":
                 if data_dir is None:
                     raise ValueError("data-dir must be provided for custom dataset")
@@ -162,8 +160,8 @@ def train(
                 )
                 num_channels = 1
             case _:
-                raise ValueError(f"Unsupported preloaded datas {preloaded_data}")
-        print(f"num_channels changed to {num_channels} for {preloaded_data} dataset")
+                raise ValueError(f"Unsupported preloaded datas {preloaded}")
+        print(f"num_channels changed to {num_channels} for {preloaded} dataset")
 
     # Split full train into train and validation
     train_dataset, val_dataset = random_split(

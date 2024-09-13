@@ -36,7 +36,7 @@ diffumon train --help
 ```
 
 ```bash
-diffumon train --preloaded-data pokemon --num-epochs 128
+diffumon train --preloaded-data mnist --num-epochs 15
 ```
 
 
