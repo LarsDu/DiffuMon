@@ -165,7 +165,9 @@ def train_ddpm(
     avg_test_batch_loss = eval_epoch(model, test_dataloader, ns, device=device)
     print(f"\n\nTest Loss: {avg_test_batch_loss}")
     summary = TrainingSummary(
-        np.array(train_losses), np.array(val_losses), avg_test_batch_loss.item
+        train_losses.cpu().detach().numpy(),
+        val_losses.cpu().detach().numpy(),
+        avg_test_batch_loss.item(),
     )
 
     # Checkpoint the model and noise schedule
