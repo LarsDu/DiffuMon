@@ -41,10 +41,10 @@ diffumon train --help
 diffumon train --preloaded fashion_mnist --num-epochs 100 --checkpoint-path checkpoints/fashion_mnist_100_epochs.pth
 ```
 
-### Train a Pokemon Generative Model on the 11k Pokemon dataset (downscaled to 28x28)
+### Train a Pokemon Generative Model on the 11k Pokemon dataset (downscaled to 32x32)
 
 ```bash
-diffumon train --preloaded pokemon_11k --num-epochs 1024 --img-dim 28 --checkpoint-path checkpoints/pokemon_11k_1024_epochs.pth
+diffumon train --preloaded pokemon_11k --num-epochs 2048 --img-dim 32 --checkpoint-path checkpoints/pokemon_11k_2048_epochs_32dim.pth
 ```
 
 ## Generate samples
@@ -62,7 +62,7 @@ diffumon sample --checkpoint-path checkpoints/fashion_mnist_100_epochs.pth --num
 ### Generate samples from the trained Pokemon Generative Model
 
 ```bash
-diffumon sample --checkpoint-path checkpoints/pokemon_11k_1024_epochs.pth --num-samples 32 --num-channels 3 --img-dim 28 --output-dir samples/pokemon_11k_1024_epochs
+diffumon sample --checkpoint-path checkpoints/pokemon_11k_2048_epochs_32dim.pth --num-samples 32 --num-channels 3 --img-dim 32 --output-dir samples/pokemon_11k_2048_epochs_32dim
 ```
 
 ## Useful resources
