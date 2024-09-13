@@ -210,7 +210,7 @@ def train(
 )
 @click.option(
     "--num-channels",
-    default=3,
+    default=1,
     type=int,
     help="Number of channels in the images",
 )
@@ -243,6 +243,7 @@ def sample(
 
     print("Generating samples...")
     # NOTE: sampler set to eval mode, no gradients
+    # TODO: Extract sample dims from the pretrained model
     p_sampler_to_images(
         model=model,
         ns=noise_schedule,
