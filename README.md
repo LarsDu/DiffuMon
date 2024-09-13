@@ -10,8 +10,6 @@ Developed as an educational project, with a much simpler PyTorch implementation 
 
 This repo uses [`rye`](https://rye.astral.sh/guide/installation/) as the package/environment manager. Make sure to install it before proceeding.
 
-```bash
-
 The following command will install packages and setup a virtual environment
 
 ```bash
