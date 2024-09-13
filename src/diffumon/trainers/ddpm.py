@@ -161,6 +161,9 @@ def train_ddpm(
         train_losses.append(epoch_train_loss / len(train_dataloader))
         # Compute the average validation batch loss across the validation set
         val_losses.append(eval_epoch(model, val_dataloader, ns, device=device))
+        print(
+            f"\n\nEpoch: {epoch}, Avg Train Batch Loss: {train_losses[-1]}, Avg Val Batch Loss: {val_losses[-1]}"
+        )
 
     avg_test_batch_loss = eval_epoch(model, test_dataloader, ns, device=device)
     print(f"\n\nTest Loss: {avg_test_batch_loss}")
