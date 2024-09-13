@@ -1,3 +1,6 @@
+# Dev notebooks excluded from source control
+dev_notebooks/
+
 # Checkpoints and downloads
 checkpoints/
 downloads/
