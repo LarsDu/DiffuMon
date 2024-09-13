@@ -81,7 +81,7 @@ def train_ddpm(
     lr: float = 1e-4,
     num_timesteps: int = 1000,
     noise_option: NoiseScheduleOption = NoiseScheduleOption.COSINE,
-    show_loss_every: int = 100,
+    show_loss_every: int = 20,
     checkpoint_path: str = "checkpoints/last_diffumon_checkpoint.pth",
 ) -> tuple[nn.Module, TrainingSummary]:
     """Train a denoising diffusion probabilistic model for images
