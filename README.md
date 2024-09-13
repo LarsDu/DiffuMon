@@ -37,10 +37,10 @@ diffumon --help
 diffumon train --help
 ```
 
-### Train a fashion MNIST model for 512 epochs
+### Train a fashion MNIST model for 20 epochs
 
 ```bash
-diffumon train --preloaded fashion_mnist --num-epochs 512 --checkpoint-path checkpoints/fashion_mnist_512_epochs.pth
+diffumon train --preloaded fashion_mnist --num-epochs 20 --checkpoint-path checkpoints/fashion_mnist_20_epochs.pth
 ```
 
 
@@ -53,7 +53,7 @@ diffumon sample --help
 ### Generate 32 samples from the trained fashion MNIST model
 
 ```bash
-diffumon sample --checkpoint-path checkpoints/fashion_mnist_512_epochs.pth --num-samples 32 --num-channels 1 --img-dim 28 
+diffumon sample --checkpoint-path checkpoints/fashion_mnist_20_epochs.pth --num-samples 32 --num-channels 1 --img-dim 28 
 ```
 
 ## Useful resources
