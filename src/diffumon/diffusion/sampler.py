@@ -48,8 +48,10 @@ def p_sampler(
     for t in reversed(range(ns.num_timesteps)):
 
         # Reshape time index to batch size so all samples are at the same timestep
-        # TODO: Refactor this into a separate function to make it easier to make examples
+
         t_batch = torch.full((num_samples,), t, device=x_t.device)
+
+        # TODO: Refactor this into a separate function to simplify example generation
         x_t = ns.sqrt_recip_alphas[t] * (
             x_t
             - ns.betas[t] * model(x_t, t_batch) / ns.sqrt_one_minus_alphas_cum_prod[t]
@@ -58,7 +60,9 @@ def p_sampler(
         if t > 0:
             # TODO: Consider caching the sqrt posterior_variance
             # TODO: Consider adding option to use betas[t].sqrt() here
-            x_t += ns.posterior_variance[t].sqrt() * torch.randn_like(x_t)
+            x_t += ns.posterior_variance[t].sqrt() * torch.randn_like(
+                x_t, device=x_t.device
+            )
 
     return x_t
 
