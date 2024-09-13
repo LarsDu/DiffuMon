@@ -129,12 +129,12 @@ def train(
                 test_dataset = ImageFolder(data_dir + "/test", transform=forward_t)
             case "pokemon_1k":
                 full_train_dataset, test_dataset = download_pokemon_sprites(
-                    output_dir="downloads/pokemon_sprites", transform=forward_t
+                    transform=forward_t
                 )
                 num_channels = 3
             case "pokemon_11k":
                 full_train_dataset, test_dataset = download_pokemon_sprites_11k(
-                    output_dir="downloads/pokemon_sprites_11k", transform=forward_t
+                    transform=forward_t
                 )
                 num_channels = 3
             case "mnist":

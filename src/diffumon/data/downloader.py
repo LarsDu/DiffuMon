@@ -344,7 +344,7 @@ def download_pokemon_sprites_11k(
     test_size: float = 0.15,
     split_seed: int = 1999,
 ) -> tuple[ImageFolder, ImageFolder]:
-    """Download the 11,000 Pokemon sprites dataset
+    """Download the 10,000+ Pokemon sprites dataset
 
     NOTE: I think this dataset might actually be from https://www.kaggle.com/datasets/yehongjiang/pokemon-sprites-images?resource=download
 

@@ -58,13 +58,13 @@ diffumon sample --help
 ### Generate samples from the trained fashion MNIST model
 
 ```bash
-diffumon sample --checkpoint-path checkpoints/fashion_mnist_100_epochs.pth --num-samples 32 --num-channels 1 --img-dim 28 --output-dir
+diffumon sample --checkpoint-path checkpoints/fashion_mnist_100_epochs.pth --num-samples 32 --num-channels 1 --img-dim 28 --output-dir samples/fashion_mnist_100_epochs
 ```
 
 ### Generate samples from the trained Pokemon Generative Model
 
 ```bash
-diffumon sample --checkpoint-path checkpoints/pokemon_11k_100_epochs.pth --num-samples 32 --num-channels 3 --img-dim 28 --output-dir
+diffumon sample --checkpoint-path checkpoints/pokemon_11k_100_epochs.pth --num-samples 32 --num-channels 3 --img-dim 28 --output-dir samples/pokemon_11k_100_epochs
 ```
 
 ## Useful resources
