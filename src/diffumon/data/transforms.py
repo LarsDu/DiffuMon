@@ -21,6 +21,7 @@ def forward_transform(resize_dims: Sequence[int]) -> Callable:
             CenterCrop(resize_dims),
             ToTensor(),  # Convert image to tensor and rescale to [0, 1]
             Lambda(lambda t: (t * 2) - 1),  # Rescale to [-1, 1]
+            v2.RandomHorizontalFlip(),  # Randomly flip the image horizontally,
         ]
     )
 

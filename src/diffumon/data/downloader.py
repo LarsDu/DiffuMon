@@ -221,7 +221,10 @@ def download_pokemon_sprites(
     if os.path.exists(train_dir) and os.path.exists(test_dir):
         print(f"Found existing train and test directories in {output_dir}")
         print("Skipping download and unpacking...")
-        return train_dir, test_dir
+        return (
+            ImageFolder(train_dir, transform=transform),
+            ImageFolder(test_dir, transform=transform),
+        )
 
     # Download the tarball to the staging directory
     staging_dir = output_dir / "staging"
@@ -239,8 +242,8 @@ def download_pokemon_sprites(
     )
 
     # Create the 'train' and 'test' directories
-    os.makedirs(train_dir, exist_ok=True)
-    os.makedirs(test_dir, exist_ok=True)
+    os.makedirs(train_dir / "class_0", exist_ok=True)
+    os.makedirs(test_dir / "class_0", exist_ok=True)
 
     # Randomly select images for the test set
     images = list((staging_dir / archive_image_path).glob("*.png"))

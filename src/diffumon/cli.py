@@ -34,7 +34,7 @@ def main():
 )
 @click.option(
     "--num-epochs",
-    default=5,
+    default=8,
     type=int,
     help="Number of epochs to train the model",
 )
@@ -71,7 +71,7 @@ def main():
 )
 @click.option(
     "--num-channels",
-    default=3,
+    default=1,
     type=int,
     help="Number of channels in the images",
 )
@@ -128,6 +128,8 @@ def train(
                 full_train_dataset, test_dataset = download_pokemon_sprites(
                     output_dir="downloads/pokemon_sprites", transform=forward_t
                 )
+                print(full_train_dataset)
+                print(test_dataset)
                 num_channels = 3
             case "mnist":
                 # Hack to get around MNIST download issue
