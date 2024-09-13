@@ -270,7 +270,8 @@ def download_pokemon_sprites(
         The 'train' and 'test' ImageFolder datasets
     """
     output_dir = Path(output_dir)
-    archive_image_path = Path(archive_image_path)
+    if internal_dirs is not None:
+        internal_dirs = [Path(d) for d in internal_dirs]
 
     if transform is None:
         transform = forward_transform()
