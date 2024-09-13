@@ -50,7 +50,7 @@ def reverse_transform() -> Callable:
     """
     return Compose(
         [
-            Lambda(lambda t: (t + 1) / 2 * 255.0),  # Rescale to [0, 255]
+            Lambda(lambda t: ((t + 1) / 2) * 255.0),  # Rescale to [0, 255]
             Lambda(
                 lambda t: t.permute(1, 2, 0).cpu().numpy().astype(np.uint8)
             ),  # CHW to HWC to numpy

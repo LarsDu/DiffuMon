@@ -29,7 +29,7 @@ def main():
 @click.option(
     "--preloaded",
     type=str,
-    default="mnist",
+    default="fashion_mnist",
     help="Select a preloaded dataset which will be downloaded automatically. Can choose from ['pokemon', 'mnist', 'fashion_mnist']. Will override num_channels accoring to the dataset. NOTE: pokemon dataset is currently too small for effective sampling.",
 )
 @click.option(
@@ -40,7 +40,7 @@ def main():
 )
 @click.option(
     "--batch-size",
-    default=256,
+    default=128,
     type=int,
     help="Batch size for training the model",
 )
@@ -191,7 +191,7 @@ def train(
 
 @main.command(help="Generate image samples from from random noise")
 @click.option(
-    "--num-samples", default=10, type=int, help="Number of samples to generate"
+    "--num-samples", default=32, type=int, help="Number of samples to generate"
 )
 @click.option(
     "--output-dir",

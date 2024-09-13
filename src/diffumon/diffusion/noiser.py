@@ -22,6 +22,7 @@ def q_forward(
     noise = torch.randn_like(x0, device=x0.device)
     # Select the ts in your batch sample
     return (
-        x0 + ns.sqrt_alphas_cum_prod[t].view(-1, 1, 1, 1) * noise,
+        ns.sqrt_alphas_cum_prod[t].view(-1, 1, 1, 1) * x0
+        + ns.sqrt_one_minus_alphas_cum_prod[t].view(-1, 1, 1, 1) * noise,
         noise,
     )
