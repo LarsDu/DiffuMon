@@ -249,6 +249,7 @@ def download_pokemon_sprites(
     split_seed: int = 1999,
     delete_archive: bool = True,
     delete_staging: bool = True,
+    img_file_extension: str = ".png",
 ) -> tuple[Dataset, Dataset]:
     """Download a pokemon sprite dataset
 
@@ -265,7 +266,7 @@ def download_pokemon_sprites(
         split_seed: The seed to use for the random train/test split
         delete_archive: Whether to delete the downloaded files after unpacking
         delete_staging: Whether to delete the staging directory after completion
-
+        img_file_extension: The file extension of the images in the dataset
     Returns:
         The 'train' and 'test' ImageFolder datasets
     """
@@ -310,7 +311,8 @@ def download_pokemon_sprites(
     os.makedirs(test_dir / "class_0", exist_ok=True)
 
     # Randomly select images for the test set
-    images = list((staging_dir / archive_image_path).glob("*.png"))
+
+    images = [img for img in staging_dir.rglob(f"*{img_file_extension}")]
     random.seed(split_seed)
     random.shuffle(images)
     # The first test_size proportion of images are for the test set
@@ -345,7 +347,7 @@ def download_pokemon_sprites_11k(
     test_size: float = 0.15,
     split_seed: int = 1999,
 ) -> tuple[ImageFolder, ImageFolder]:
-    """Download the 10,000+ Pokemon sprites dataset
+    """Download the 11,779 Pokemon sprites dataset consisting of 96x96 color png images
 
     NOTE: I think this dataset might actually be from https://www.kaggle.com/datasets/yehongjiang/pokemon-sprites-images?resource=download
 
@@ -365,6 +367,9 @@ def download_pokemon_sprites_11k(
         transform=transform,
         test_size=test_size,
         output_dir="downloads/pokemon_sprites_11k",
-        md5sum="f9e4d3d0d28b620579e0731115e8b30d24998b8c8bb0f5f3b9f8e4a5d4f1e2a0",
+        md5sum="8b620579e0731115e8b30d24998b8c8b",
         split_seed=split_seed,
+        img_file_extension=".png",
+        delete_archive=True,
+        delete_staging=True,
     )
