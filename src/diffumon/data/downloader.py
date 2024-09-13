@@ -224,7 +224,7 @@ def download_pokemon_sprites(
     os.makedirs(test_dir, exist_ok=True)
 
     # Randomly select images for the test set
-    images = list((staging_dir / archive_image_path).glob("*"))
+    images = list((staging_dir / archive_image_path).glob("*.png"))
     random.seed(split_seed)
     random.shuffle(images)
     # The first test_size proportion of images are for the test set
@@ -235,7 +235,6 @@ def download_pokemon_sprites(
     print(
         f"Randomly partitioning images into {len(train_images)} train and {len(test_images)} test samples with seed {split_seed}"
     )
-    print(images)
     # Copy the images to the 'train' and 'test' directories
     for img in train_images:
         if img.is_dir():
