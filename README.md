@@ -7,7 +7,9 @@ Basic Denoising Diffusion Probabilistic Model image generator implemented in PyT
 
 ## Setting up environment
 
-This repo uses [`rye`](https://rye.astral.sh/guide/installation/) as the package/environment manager
+This repo uses [`rye`](https://rye.astral.sh/guide/installation/) as the package/environment manager. Make sure to install it before proceeding.
+
+```bash
 
 The following command will install packages and setup a virtual environment
 
