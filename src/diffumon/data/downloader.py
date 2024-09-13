@@ -3,42 +3,40 @@
 
 import gzip
 import os
+import random
 import shutil
 import tarfile
 from pathlib import Path
-from random import random
 from typing import Sequence
 
 import requests
 from tqdm import tqdm
 
 
-def download_file(url: str, output_path: str) -> None:
+def download_file(url: str, output_file: str | Path) -> None:
     """Download a file from a URL to a path
 
     Args:
         url: The URL to download the file from
         output_path: The path to save the downloaded file
     """
+    output_file = Path(output_file)
     # Skip if already downloaded
-    if Path(output_path).exists():
-        print(f"Found existing file at {output_path}")
+    if output_file.exists():
+        print(f"Found existing file at {output_file}")
         return
 
-    print(f"Downloading {url} to {output_path}")
+    print(f"Downloading {url} to {output_file}")
     with requests.get(url, stream=True) as r:
-        total_size = int(r.headers.get("content-length", 0))
-        with open(output_path, "wb") as f:
+        with open(output_file, "wb") as f:
             # Show progress bar for the download
-            for data in tqdm(
-                r.iter_content(chunk_size=1024),
-                total=total_size,
-                unit="B",
-                unit_scale=True,
-            ):
+            # ref: https://stackoverflow.com/questions/56795229
+            pbar = tqdm(total=int(r.headers["Content-Length"]))
+            for data in r.iter_content(chunk_size=1024):
                 f.write(data)
+                pbar.update(len(data))
 
-    return output_path
+    return output_file
 
 
 def unpack_tarball(
@@ -46,7 +44,7 @@ def unpack_tarball(
     output_dir: str | Path,
     internal_dirs: list[Path],
     delete_tarball: bool = False,
-    extension: str = "tar.gz",
+    extension: str = "gz",
 ) -> None:
     """Unpack a tarball to a directory
 
@@ -74,7 +72,8 @@ def unpack_tarball(
             # Extract everything
             tar.extractall(output_dir)
 
-    if delete_tarball:
+    if delete_tarball and tarball_path.exists():
+        print(f"Deleting tarball at {tarball_path}")
         os.remove(tarball_path)
 
 
@@ -97,7 +96,8 @@ def unpack_gzip(
         with open(output_dir, "wb") as f_out:
             shutil.copyfileobj(f_in, f_out)
 
-    if delete_gzip:
+    if delete_gzip and gzip_file.exists():
+        print(f"Deleting gzip file at {gzip_file}")
         os.remove(gzip_file)
 
 
@@ -134,16 +134,18 @@ def download_unpack_images(
     # Extract basename from url
     basename = os.path.basename(url)
     archive_file: Path = output_dir / basename
+
+    print(archive_file.suffix)
     download_file(url, archive_file)
 
     # Unpack the archive to the staging directory
-    if archive_file.suffix == ".tar.gz":
+    if archive_file.name.endswith(".tar.gz"):
         unpack_tarball(
             archive_file,
             output_dir=output_dir,
             internal_dirs=internal_dirs,
             delete_tarball=delete_archive,
-            extension=".tar.gz",
+            extension="gz",
         )
     elif archive_file.suffix == ".gz":
         unpack_gzip(
@@ -161,9 +163,6 @@ def download_unpack_images(
         )
     else:
         raise ValueError(f"Unsupported archive extension in {archive_file.name}")
-
-    if delete_archive:
-        os.remove(archive_file)
 
 
 def download_pokemon_sprites(
