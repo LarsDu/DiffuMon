@@ -64,7 +64,7 @@ def main():
 )
 # TODO: Extract dim and channels from the dataset
 @click.option(
-    "--img_dim",
+    "--img-dim",
     type=int,
     default=28,
     help="Resize images to this height and width",
@@ -207,7 +207,7 @@ def train(
 )
 # TODO: Store the image dimensions and channels in the model
 @click.option(
-    "--img_dim",
+    "--img-dim",
     type=int,
     default=28,
     help="Resize images to this height and width",
