@@ -29,15 +29,14 @@ def download_file(url: str, output_file: str | Path) -> None:
     print(f"Downloading {url} to {output_file}")
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
+        # Show progress bar for the download
+        # ref: https://stackoverflow.com/questions/56795229
         pbar = tqdm(total=int(r.headers["Content-Length"]))
         with open(output_file, "wb") as f:
-            # Show progress bar for the download
-            # ref: https://stackoverflow.com/questions/56795229
-
             for data in r.iter_content(chunk_size=1024):
                 if data:
                     f.write(data)
-                    # pbar.update(len(data))
+                    pbar.update(len(data))
 
     return output_file
 
