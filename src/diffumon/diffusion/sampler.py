@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Sequence
 
-import PIL.Image.Image as PILImage
 import torch
+from PIL.Image import Image as PILImage
 from torch import Tensor, nn
 from tqdm import tqdm
 
@@ -49,7 +49,7 @@ def p_sampler(
 
         # Reshape time index to batch size so all samples are at the same timestep
         # TODO: Refactor this into a separate function to make it easier to make examples
-        t_batch = torch.full((num_samples,), t, device=model.device)
+        t_batch = torch.full((num_samples,), t, device=x_t.device)
         x_t = ns.sqrt_recip_alphas[t] * (
             x_t
             - ns.betas[t] * model(x_t, t_batch) / ns.sqrt_one_minus_alphas_cum_prod[t]
