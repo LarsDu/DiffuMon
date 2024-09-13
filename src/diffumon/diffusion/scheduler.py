@@ -44,8 +44,8 @@ def linear_beta_schedule(
     return torch.linspace(beta_start, beta_end, timesteps, device=device)
 
 
-# NOTE: Keep frozen to avoid runtime mutation
-@dataclass(frozen=True)
+# FIXME: Consider making frozen to avoid runtime mutation. But need to assign device...
+@dataclass
 class NoiseSchedule:
     """Encapsulates a noise schedule for the diffusion process.
 
@@ -77,6 +77,21 @@ class NoiseSchedule:
     @property
     def num_timesteps(self) -> int:
         return self.betas.shape[0]
+
+    def to(self, device: torch.device) -> "NoiseSchedule":
+        self.betas = self.betas.to(device)
+        self.sqrt_betas = self.sqrt_betas.to(device)
+        self.alphas = self.alphas.to(device)
+        self.alphas_cum_prod = self.alphas_cum_prod.to(device)
+        self.alphas_cum_prod_prev = self.alphas_cum_prod_prev.to(device)
+        self.sqrt_recip_alphas = self.sqrt_recip_alphas.to(device)
+        self.sqrt_alphas_cum_prod = self.sqrt_alphas_cum_prod.to(device)
+        self.sqrt_one_minus_alphas_cum_prod = self.sqrt_one_minus_alphas_cum_prod.to(
+            device
+        )
+        self.posterior_variance = self.posterior_variance.to(device)
+        self.posterior_deviation = self.posterior_deviation.to(device)
+        return self
 
 
 @torch.no_grad()

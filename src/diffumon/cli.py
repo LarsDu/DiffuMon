@@ -261,7 +261,8 @@ def sample(
         num_channels=num_channels,
     )
     model.load_state_dict(checkpoint["model_state_dict"])
-    model.to(get_device())
+    model.to(device)
+    noise_schedule.to(device)
 
     print("Generating samples...")
     # NOTE: sampler set to eval mode, no gradients
