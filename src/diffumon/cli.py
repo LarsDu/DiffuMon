@@ -226,7 +226,7 @@ def train(
 def sample(
     num_samples: int,
     output_dir: str,
-    model_path: str,
+    checkpoint_path: str,
     img_dim: int,
     num_channels: int,
     seed: int,
@@ -234,8 +234,8 @@ def sample(
     # Code for sampling diffumon
 
     # Load the trained model
-    print(f"Loading trained model from {model_path}...")
-    with open(model_path, "rb") as f:
+    print(f"Loading trained model from {checkpoint_path}...")
+    with open(checkpoint_path, "rb") as f:
         checkpoint = torch.load(f)
 
     noise_schedule = pickle.loads(checkpoint["noise_schedule"])
