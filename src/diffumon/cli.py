@@ -1,9 +1,9 @@
+import os
 import pickle
 import urllib.request
 
 import click
 import torch
-from torch import nn
 from torch.utils.data import DataLoader, Dataset, random_split
 from torchvision import datasets
 from torchvision.datasets import ImageFolder
@@ -112,6 +112,10 @@ def train(
     test_dataset: Dataset
     if preloaded:
         print(f"Downloading and unpacking {preloaded} dataset...")
+
+        if not os.path.exists("downloads"):
+            os.makedirs("downloads")
+
         match preloaded:
             case "custom":
                 if data_dir is None:
