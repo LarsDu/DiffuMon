@@ -13,7 +13,9 @@ import requests
 from tqdm import tqdm
 
 
-def download_file(url: str, output_file: str | Path) -> None:
+def download_file(
+    url: str, output_file: str | Path, headers: dict[str, str] | None = None
+) -> None:
     """Download a file from a URL to a path
 
     Args:
@@ -27,11 +29,13 @@ def download_file(url: str, output_file: str | Path) -> None:
         return
 
     print(f"Downloading {url} to {output_file}")
-    with requests.get(url, stream=True) as r:
+    if headers is not None:
+        print(f"Using headers {headers}")
+    with requests.get(url, stream=True, headers=headers) as r:
         r.raise_for_status()
         # Show progress bar for the download
         # ref: https://stackoverflow.com/questions/56795229
-        pbar = tqdm(total=int(r.headers["Content-Length"]))
+        pbar = tqdm(total=int(r.headers.get("Content-Length", 0)))
         with open(output_file, "wb") as f:
             for data in r.iter_content(chunk_size=1024):
                 if data:
@@ -71,7 +75,6 @@ def unpack_tarball(
                 if any(str(member.name).startswith(str(d)) for d in internal_dirs):
                     # print(f"Extracting {member.name}")
                     members_to_extract.append(member)
-            print(members_to_extract)
             tar.extractall(path=output_dir, members=members_to_extract)
         else:
             # Extract everything
@@ -111,6 +114,7 @@ def download_unpack_images(
     output_dir: str,
     internal_dirs: Sequence[Path | str] | None = None,
     delete_archive: bool = False,
+    headers: dict[str, str] | None = None,
 ) -> None:
     """Download and unpack images from a URL
 
@@ -122,6 +126,7 @@ def download_unpack_images(
             the desired images. If None, unpack the whole archive
         delete_archive: Whether to delete the tarball or
             gzip after unpacking
+        headers: Headers to pass to the request
 
     Returns:
         The path to the output directory
@@ -140,7 +145,7 @@ def download_unpack_images(
     basename = os.path.basename(url)
     archive_file: Path = output_dir / basename
 
-    download_file(url, archive_file)
+    download_file(url, archive_file, headers=headers)
 
     # Unpack the archive to the staging directory
     if archive_file.name.endswith(".tar.gz"):
@@ -185,14 +190,29 @@ def download_pokemon_sprites(
     Args:
         url: The URL to download the dataset
         test_size: The proportion of samples to use for the test set
-        output_dir: The directory to save the downloaded dataset. Will create 'train' and 'test' subdirectories
+        output_dir: The directory to save the downloaded dataset. Will create 'train' and 'test'
+            subdirectories
+        archive_image_path: The path within the tarball to the images.
+            If specified, only unpack the images in this directory
         split_seed: The seed to use for the random train/test split
+        delete_archive: Whether to delete the downloaded files after unpacking
+        delete_staging: Whether to delete the staging directory after completion
 
     Returns:
         The paths to the 'train' and 'test' subdirectories
     """
     output_dir = Path(output_dir)
     archive_image_path = Path(archive_image_path)
+
+    # Split the images into 'train' and 'test' subdirectories
+    train_dir = output_dir / "train"
+    test_dir = output_dir / "test"
+
+    # Short circuit if these directories already exist
+    if os.path.exists(train_dir) and os.path.exists(test_dir):
+        print(f"Found existing train and test directories in {output_dir}")
+        print("Skipping download and unpacking...")
+        return train_dir, test_dir
 
     # Download the tarball to the staging directory
     staging_dir = output_dir / "staging"
@@ -208,16 +228,6 @@ def download_pokemon_sprites(
         output_dir=staging_dir,
         delete_archive=delete_archive,
     )
-
-    # Split the images into 'train' and 'test' subdirectories
-    train_dir = output_dir / "train"
-    test_dir = output_dir / "test"
-
-    # Short circuit if these directories already exist
-    if os.path.exists(train_dir) and os.path.exists(test_dir):
-        print(f"Found existing train and test directories in {output_dir}")
-        print("Skipping download and unpacking...")
-        return train_dir, test_dir
 
     # Create the 'train' and 'test' directories
     os.makedirs(train_dir, exist_ok=True)
@@ -239,16 +249,21 @@ def download_pokemon_sprites(
     for img in train_images:
         if img.is_dir():
             continue
-        shutil.copy(img, train_dir / img.name)
+        shutil.copy(img, train_dir / "class_0" / img.name)
     for img in test_images:
         if img.is_dir():
             continue
-        shutil.copy(img, test_dir / img.name)
+        shutil.copy(img, test_dir / "class_0" / img.name)
 
     if delete_staging:
         shutil.rmtree(staging_dir)
 
     return train_dir, test_dir
+
+
+"""
+    ref: https://stackoverflow.com/questions/60548000
+"""
 
 
 def download_mnist(
@@ -283,7 +298,7 @@ def download_mnist(
     test_dir = output_dir / "test"
 
     # Short circuit if these directories already exist
-    if train_dir.exists() and test_dir.exists():
+    if os.path.exists(train_dir) and os.path.exists(test_dir):
         print(f"Found existing train and test directories in {output_dir}")
         print("Skipping download and unpacking...")
         return train_dir, test_dir
@@ -292,19 +307,24 @@ def download_mnist(
     os.makedirs(train_dir, exist_ok=True)
     os.makedirs(test_dir, exist_ok=True)
 
+    lecunn_header = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
+    }
     # Download the tarball from url to staging dir
     download_unpack_images(
         train_url,
-        archive_image_path=None,  # Unpack the whole thing
-        output_dir=train_dir,
+        internal_dirs=None,  # Unpack the whole thing
+        output_dir=train_dir / "class_0",
         delete_archive=delete_archives,
+        headers=lecunn_header,
     )
 
     download_unpack_images(
         test_url,
-        archive_image_path=None,  # Unpack the whole thing
-        output_dir=test_dir,
+        internal_dirs=None,  # Unpack the whole thing
+        output_dir=test_dir / "class_0",
         delete_archive=delete_archives,
+        headers=lecunn_header,
     )
 
     return train_dir, test_dir

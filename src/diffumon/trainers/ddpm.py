@@ -61,7 +61,8 @@ def eval_epoch(
     """
     model.eval()
     total_batch_loss = 0
-    for x0 in dataloader:
+    # NOTE: Using ImageFolder, second discard term is labels
+    for x0, _ in dataloader:
         x0 = x0.to(model.device)
         t_sample = torch.randn(x0.shape[0], device=model.device)
         loss = loss_fn(model=model, x0=x0, t=t_sample, ns=ns)
@@ -115,7 +116,8 @@ def train_ddpm(
     val_losses = []
     for epoch in tqdm(range(num_epochs)):
         epoch_train_loss = 0
-        for i, x0 in enumerate(train_dataloader):
+        # NOTE: Using ImageFolder, second discard term is labels
+        for i, (x0, _) in enumerate(train_dataloader):
             x0 = x0.to(model.device)
             optimizer.zero_grad()
 

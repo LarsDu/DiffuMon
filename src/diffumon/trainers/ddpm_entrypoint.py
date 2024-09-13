@@ -3,6 +3,7 @@ Avoid cramming all the logic in cli.py and/or ddpm.py which would muddle imports
 and make the code harder to test and maintain.
 """
 
+import torch
 from torch import nn
 from torch.utils.data import DataLoader, random_split
 from torchvision.datasets import ImageFolder
@@ -46,6 +47,7 @@ def train_ddpm_entrypoint(
         Trained denoiser nn.Module model, TrainingSummary
 
     """
+    torch.manual_seed(seed)
     # Setup the forward and reverse transforms
     # H, W
     forward_t = forward_transform((img_dim, img_dim))
@@ -73,7 +75,6 @@ def train_ddpm_entrypoint(
         train_dataloader=train_dataloader,
         test_dataloader=test_dataloader,
         val_dataloader=val_dataloader,
-        img_dim=img_dim,
         num_epochs=num_epochs,
         batch_size=batch_size,
         checkpoint_path=checkpoint_path,
