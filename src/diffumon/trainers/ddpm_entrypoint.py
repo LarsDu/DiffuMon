@@ -4,11 +4,11 @@ and make the code harder to test and maintain.
 """
 
 from torch import nn
-from torch.data.utils.data import DataLoader, random_split
-from torchvision.dataset import ImageFolder
+from torch.utils.data import DataLoader, random_split
+from torchvision.datasets import ImageFolder
 
 from diffumon.data.transforms import forward_transform
-from diffumon.models.unet import UNet
+from diffumon.models.unet import Unet
 from diffumon.trainers.ddpm import train_ddpm
 from diffumon.trainers.summary import TrainingSummary
 from diffumon.utils import get_device
@@ -63,7 +63,7 @@ def train_ddpm_entrypoint(
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     # Train the model
-    model: nn.Module = UNet(
+    model: nn.Module = Unet(
         dim=img_dim,
         num_channels=num_channels,
     )

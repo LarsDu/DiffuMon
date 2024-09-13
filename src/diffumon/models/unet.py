@@ -68,7 +68,7 @@ class Unet(nn.Module):
         time_dim = dim * 4
 
         self.time_mlp = nn.Sequential(
-            SinusoidalPositionEmbeddings(dim),
+            SinusoidalPosEmb(dim),
             nn.Linear(dim, time_dim),
             nn.GELU(),
             nn.Linear(time_dim, time_dim),
