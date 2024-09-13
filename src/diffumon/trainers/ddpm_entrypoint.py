@@ -8,8 +8,10 @@ from torch.data.utils.data import DataLoader, random_split
 from torchvision.dataset import ImageFolder
 
 from diffumon.data.transforms import forward_transform
+from diffumon.models.unet import UNet
 from diffumon.trainers.ddpm import train_ddpm
 from diffumon.trainers.summary import TrainingSummary
+from diffumon.utils import get_device
 
 
 def train_ddpm_entrypoint(
@@ -61,8 +63,11 @@ def train_ddpm_entrypoint(
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     # Train the model
-    model: nn.Module
-    training_summary: TrainingSummary
+    model: nn.Module = UNet(
+        dim=img_dim,
+        num_channels=num_channels,
+    )
+    model.to(get_device())
 
     model, training_summary = train_ddpm(
         train_dataloader=train_dataloader,

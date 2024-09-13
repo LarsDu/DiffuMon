@@ -35,23 +35,24 @@ class PreNorm(nn.Module):
         return self.fn(x)
 
 
+@torch.compile
 class Unet(nn.Module):
     def __init__(
         self,
         dim: int,
         init_dim: int | None = None,
         out_dim: int | None = None,
-        dim_mults: tuple[int] = (1, 2, 4, 8),
-        channels: int = 3,
+        dim_mults: tuple[int] = (1, 2, 4),
+        num_channels: int = 3,
         self_condition: bool = False,
         resnet_block_groups: int = 4,
     ):
         super().__init__()
 
         # determine dimensions
-        self.channels = channels
+        self.channels = num_channels
         self.self_condition = self_condition
-        input_channels = channels * (2 if self_condition else 1)
+        input_channels = num_channels * (2 if self_condition else 1)
 
         init_dim = default(init_dim, dim)
         self.init_conv = nn.Conv2d(
@@ -119,7 +120,7 @@ class Unet(nn.Module):
                 )
             )
 
-        self.out_dim = default(out_dim, channels)
+        self.out_dim = default(out_dim, num_channels)
 
         self.final_res_block = block_klass(dim * 2, dim, time_emb_dim=time_dim)
         self.final_conv = nn.Conv2d(dim, self.out_dim, 1)

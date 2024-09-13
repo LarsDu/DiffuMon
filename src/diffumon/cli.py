@@ -1,11 +1,14 @@
+import pickle
 from pathlib import Path
 
 import click
+import torch
 
 from diffumon.data.downloader import download_mnist, download_pokemon
-
-# from diffumon.diffusion.sampler import p_sampler
+from diffumon.diffusion.sampler import p_sampler_to_images
+from diffumon.models.unet import Unet
 from diffumon.trainers.ddpm_entrypoint import train_ddpm_entrypoint
+from diffumon.utils import get_device
 
 
 # Setup the CLI
@@ -54,6 +57,7 @@ def main():
     type=int,
     help="Number of timesteps in the diffusion process",
 )
+# TODO: Extract dim and channels from the dataset
 @click.option(
     "img_dim",
     type=int,
@@ -136,12 +140,56 @@ def train(
     type=str,
     help="Path to the trained model",
 )
+# TODO: Store the image dimensions and channels in the model
+@click.option(
+    "img_dim",
+    type=int,
+    default=28,
+    help="Resize images to this height and width",
+)
+@click.option(
+    "--num-channels",
+    default=3,
+    type=int,
+    help="Number of channels in the images",
+)
 @click.option(
     "--seed", default=1999, type=int, help="Random seed for generating samples"
 )
-def sample(num_samples: int, output_dir: str, model_path: str, seed: int) -> None:
+def sample(
+    num_samples: int,
+    output_dir: str,
+    model_path: str,
+    img_dim: int,
+    num_channels: int,
+    seed: int,
+) -> None:
     # Code for sampling diffumon
+
+    # Load the trained model
+    print(f"Loading trained model from {model_path}...")
+    with open(model_path, "rb") as f:
+        checkpoint = torch.load(f)
+
+    noise_schedule = pickle.loads(checkpoint["noise_schedule"])
+
+    model = Unet(
+        dim=img_dim,
+        num_channels=num_channels,
+    )
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.to(get_device())
+
     print("Generating samples...")
+    # NOTE: sampler set to eval mode, no gradients
+    p_sampler_to_images(
+        model=model,
+        ns=noise_schedule,
+        num_samples=num_samples,
+        dims=(num_channels, img_dim, img_dim),
+        seed=seed,
+        output_dir=output_dir,
+    )
 
 
 if __name__ == "__main__":

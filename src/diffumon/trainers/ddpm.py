@@ -1,3 +1,5 @@
+import pickle
+
 import numpy as np
 import torch
 from torch import Tensor, nn
@@ -145,7 +147,14 @@ def train_ddpm(
         np.array(train_losses), np.array(val_losses), avg_test_batch_loss.item
     )
 
-    # Checkpoint the model
-    torch.save(model.state_dict(), checkpoint_path)
+    # Checkpoint the model and noise schedule
+    with open(checkpoint_path, "wb") as f:
+        torch.save(
+            {
+                "model_state_dict": model.state_dict(),
+                "noise_schedule": pickle.dumps(ns),
+            },
+            checkpoint_path,
+        )
 
     return model, summary
