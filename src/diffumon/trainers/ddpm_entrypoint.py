@@ -47,8 +47,8 @@ def train_ddpm_entrypoint(
 
     """
     # Setup the forward and reverse transforms
-    # C, H, W
-    forward_t = forward_transform((num_channels, img_dim, img_dim))
+    # H, W
+    forward_t = forward_transform((img_dim, img_dim))
 
     # Setup the dataloaders
     full_train_dataset = ImageFolder(train_dir, transform=forward_t)
