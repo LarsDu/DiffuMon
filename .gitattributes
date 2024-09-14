@@ -1,0 +1,2 @@
+# Don't scan Jupyter Notebooks for language statistics
+notebooks/* linguist-vendored
