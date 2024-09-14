@@ -15,6 +15,8 @@ The basic idea is to train a model to learn how to denoise images. Images are ge
 ![Pokemon 11k](static/example_pokemon_11k.png)
 *Pokemon 11k sample generations*
 
+* NOTE: At these high epochs and parameter counts, the model is likely overfitting*
+
 ## Getting started
 
 ## Setting up environment
