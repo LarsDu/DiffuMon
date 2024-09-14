@@ -30,7 +30,7 @@ def load_unet_checkpoint(
     print(f"Loading trained model from {checkpoint_path}...")
     with open(checkpoint_path, "rb") as f:
         checkpoint = torch.load(f)
-        chw_dim = checkpoint.get("img_dim", (1, 28, 28))  # FIXME: unhardcode later
+        chw_dim = checkpoint["img_dims"]
     noise_schedule = pickle.loads(checkpoint["noise_schedule"])
 
     model = Unet(

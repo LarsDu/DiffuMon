@@ -9,9 +9,11 @@ The basic idea is to train a model to learn how to denoise images. Images are ge
 ## Example Generations
 
 ![Fashion MNIST](static/example_fashion_mnist.png)
-
 *Fashion MNIST sample generations*
 
+
+![Pokemon 11k](static/example_pokemon_11k.png)
+*Pokemon 11k sample generations*
 
 ## Getting started
 

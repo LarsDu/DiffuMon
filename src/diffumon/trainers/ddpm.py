@@ -183,7 +183,7 @@ def train_ddpm(
                 "model_state_dict": model.state_dict(),
                 "noise_schedule": pickle.dumps(ns),
                 "summary": pickle.dumps(summary),
-                "img_dims": pickle.dumps(train_dataloader.dataset[0][0].shape[1:]),
+                "img_dims": list(train_dataloader.dataset[0][0].size()),
             },
             f,
         )
