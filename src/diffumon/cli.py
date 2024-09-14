@@ -33,7 +33,7 @@ def main():
     "--preloaded",
     type=str,
     default="mnist",
-    help="Select a preloaded dataset which will be downloaded automatically. Can choose from ['mnist', 'fashion_mnist', 'pokemon_1k', 'pokemon_11k']. Will override num_channels accoring to the dataset. NOTE: pokemon dataset is currently too small for effective sampling.",
+    help="Select a preloaded dataset which will be downloaded automatically. Can choose from ['mnist', 'fashion_mnist', 'pokemon_1k', 'pokemon_11k', 'celeba', 'flowers102']. Will override num_channels accoring to the dataset. NOTE: pokemon dataset is currently too small for effective sampling.",
 )
 @click.option(
     "--num-epochs",
@@ -171,6 +171,51 @@ def train(
                     transform=forward_t,
                 )
                 num_channels = 1
+            case "celeba":
+                celeba_train_dataset = datasets.CelebA(
+                    root="downloads/celeba",
+                    split="train",
+                    download=True,
+                    transform=forward_t,
+                )
+                celeba_val_dataset = datasets.CelebA(
+                    root="downloads/celeba",
+                    split="valid",
+                    download=True,
+                    transform=forward_t,
+                )
+                # NOTE: This is a little janky, but keeps things consistent downstream
+                full_train_dataset = torch.utils.data.ConcatDataset(
+                    [celeba_train_dataset, celeba_val_dataset]
+                )
+                test_dataset = datasets.CelebA(
+                    root="downloads/celeba",
+                    split="test",
+                    download=True,
+                    transform=forward_t,
+                )
+            case "flowers102":
+                flower_train_dataset = datasets.Flowers102(
+                    root="downloads/flowers102",
+                    split="train",
+                    download=True,
+                    transform=forward_t,
+                )
+                flower_val_dataset = datasets.Flowers102(
+                    root="downloads/flowers102",
+                    split="valid",
+                    download=True,
+                    transform=forward_t,
+                )
+                full_train_dataset = torch.utils.data.ConcatDataset(
+                    [flower_train_dataset, flower_val_dataset]
+                )
+                test_dataset = datasets.Flowers102(
+                    root="downloads/flowers102",
+                    split="test",
+                    download=True,
+                    transform=forward_t,
+                )
             case _:
                 raise ValueError(f"Unsupported preloaded datas {preloaded}")
         print(f"num_channels changed to {num_channels} for {preloaded} dataset")
