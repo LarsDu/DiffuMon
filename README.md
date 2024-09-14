@@ -13,7 +13,7 @@ The basic idea is to train a model to learn how to denoise images. Images are ge
 * Reproducible environment with [`rye`](https://rye.astral.sh/guide/installation/). Get setup with a single command.
 * Automatic dataset download and preprocessing for certain preloaded datasets.
 * Example notebook for sampling and gif generation.
-* Train on your own dataset with a simple directory structure!
+* Train on your own dataset by providing image files in a `--data-dir` directory.
 
 ## Example Generations
 

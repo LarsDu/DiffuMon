@@ -33,7 +33,7 @@ def main():
     "--preloaded",
     type=str,
     default="mnist",
-    help="Select a preloaded dataset which will be downloaded automatically. Can choose from ['mnist', 'fashion_mnist', 'pokemon_1k', 'pokemon_11k', 'celeba', 'flowers102']. Will override num_channels accoring to the dataset. NOTE: pokemon dataset is currently too small for effective sampling.",
+    help="Select a preloaded dataset which will be downloaded automatically. Can choose from ['mnist', 'fashion_mnist', 'pokemon_1k', 'pokemon_11k', 'celeba', 'flowers102']. Will override num_channels accoring to the dataset.",
 )
 @click.option(
     "--num-epochs",
@@ -128,6 +128,9 @@ def train(
                 )
                 test_dataset = ImageFolder(data_dir + "/test", transform=forward_t)
             case "pokemon_1k":
+                print(
+                    "WARNING! Pokemon 1k dataset is extremely small and is included solely for demonstration purposes. Expect overfitting/memorization at high epochs"
+                )
                 full_train_dataset, test_dataset = download_pokemon_sprites(
                     transform=forward_t
                 )
@@ -194,6 +197,7 @@ def train(
                     download=True,
                     transform=forward_t,
                 )
+                num_channels = 3
             case "flowers102":
                 flower_train_dataset = datasets.Flowers102(
                     root="downloads/flowers102",
@@ -216,6 +220,7 @@ def train(
                     download=True,
                     transform=forward_t,
                 )
+                num_channels = 3
             case _:
                 raise ValueError(f"Unsupported preloaded datas {preloaded}")
         print(f"num_channels changed to {num_channels} for {preloaded} dataset")
