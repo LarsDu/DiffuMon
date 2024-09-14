@@ -15,7 +15,7 @@ from diffumon.utils import get_device
 def p_sampler(
     model: nn.Module,
     ns: NoiseSchedule,
-    dims: Sequence[int],
+    chw_dims: Sequence[int],
     num_samples: int,
     seed: int,
     device: torch.device | None = None,
@@ -37,7 +37,7 @@ def p_sampler(
     if device is None:
         device = get_device()
 
-    img_batch_dims = [num_samples] + list(dims)
+    img_batch_dims = [num_samples] + list(chw_dims)
 
     # Generate random starting noise at max timestep
     x_t = torch.randn(*img_batch_dims, device=device)
@@ -95,7 +95,7 @@ def p_sampler_to_images(
     sample_batch = p_sampler(
         model=model,
         ns=ns,
-        dims=chw_dims,
+        chw_dims=chw_dims,
         num_samples=num_samples,
         seed=seed,
         device=device,

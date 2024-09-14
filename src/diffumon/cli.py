@@ -234,7 +234,7 @@ def sample(
     if device is None:
         device = get_device()
 
-    model, noise_schedule, chw_dims = load_unet_checkpoint(
+    model, noise_schedule, _, chw_dims = load_unet_checkpoint(
         checkpoint_path, device=device
     )
 

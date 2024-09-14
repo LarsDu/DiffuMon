@@ -40,5 +40,9 @@ def load_unet_checkpoint(
     model.load_state_dict(checkpoint["model_state_dict"])
     model.to(device)
     noise_schedule.to(device)
+
+    # Load the training summary
+    training_summary = pickle.loads(checkpoint.get("summary", None))
+
     print("Model loaded.")
-    return model, noise_schedule, chw_dim
+    return model, noise_schedule, training_summary, chw_dim
