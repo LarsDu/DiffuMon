@@ -1,3 +1,4 @@
+import matplotlib.animation as animation
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
@@ -27,3 +28,22 @@ def combine_images(images: list[PILImage], rows: int, cols: int) -> PILImage:
         y_offset = (i // cols) * height
         combined.paste(image, (x_offset, y_offset))
     return combined
+
+
+def animate_images(
+    frames: list[PILImage],
+    interval: int = 100,
+    repeat_delay: int = 3000,
+) -> animation.FuncAnimation:
+    """Animate a list of images"""
+    fig = plt.figure(
+        figsize=(frames[0].size[0] / 100, frames[0].size[1] / 100), dpi=100
+    )
+    # Remove axis from the figure
+    ax = plt.gca()
+    ax.axis("off")
+    ims = [[plt.imshow(img)] for img in frames]
+    ani = animation.ArtistAnimation(
+        fig, ims, interval=interval, repeat_delay=repeat_delay
+    )
+    return ani

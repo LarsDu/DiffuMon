@@ -17,6 +17,10 @@ The basic idea is to train a model to learn how to denoise images. Images are ge
 
 *NOTE: With small images, and high training epochs, the model likely overfits and gains the capability to memorize training samples*
 
+### Denoising in action
+
+![Denoising fashion MNIST](static/fashion_mnist_diffusion.gif)
+
 
 ## Getting started
 
