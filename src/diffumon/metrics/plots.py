@@ -32,8 +32,8 @@ def combine_images(images: list[PILImage], rows: int, cols: int) -> PILImage:
 
 def animate_images(
     frames: list[PILImage],
-    interval: int = 100,
-    repeat_delay: int = 3000,
+    interval: int = 300,
+    repeat_delay: int = 10000,
 ) -> animation.FuncAnimation:
     """Animate a list of images"""
     fig = plt.figure(
@@ -44,6 +44,6 @@ def animate_images(
     ax.axis("off")
     ims = [[plt.imshow(img)] for img in frames]
     ani = animation.ArtistAnimation(
-        fig, ims, interval=interval, repeat_delay=repeat_delay
+        fig, ims, interval=interval, repeat_delay=repeat_delay, repeat=True
     )
     return ani
