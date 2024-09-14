@@ -21,6 +21,8 @@ The basic idea is to train a model to learn how to denoise images. Images are ge
 
 ![Denoising fashion MNIST](static/fashion_mnist_diffusion.gif)
 
+![Denoising Pokemon 11k](static/pokemon_diffusion.gif)
+
 
 ## Getting started
 
