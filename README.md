@@ -72,7 +72,7 @@ diffumon train --help
 diffumon train --preloaded fashion_mnist --num-epochs 100 --checkpoint-path checkpoints/fashion_mnist_100epochs.pth
 ```
 
-### Train a Pokemon Generative Model on the 11k Pokemon dataset (downscaled to 32x32)
+### Train a Pokemon Generative Model on the 11k Pokemon dataset (downscaled to 64x64 pixels)
 
 ```bash
 diffumon train --preloaded pokemon_11k --num-epochs 800 --img-dim 64 -- batch-size 64 --checkpoint-path checkpoints/pokemon_11k_800epochs_64dim.pth
