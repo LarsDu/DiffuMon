@@ -149,5 +149,8 @@ python -m ipykernel install --user --name diffumon --display-name "Python Diffum
 ### TODOs
 
 - [ ] Add support for more [preloaded datasets](https://pytorch.org/vision/stable/datasets.html)
-- [ ] Add smarter checkpointing and early stopping
+- [ ] Add smarter periodic checkpointing
+- [ ] Add logging
 - [ ] Improve learning rate scheduling
+- [ ] Add DDIM (Denoising Diffusion Implicit Models) support
+- [ ] Add (Hydra-based?) preconfigured training options

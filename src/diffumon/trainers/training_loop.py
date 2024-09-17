@@ -85,19 +85,19 @@ def eval_epoch(
     return avg_loss
 
 
-def train_ddpm(
+def train_noise_predictor(
     model: nn.Module,
     train_dataloader: DataLoader,
     val_dataloader: DataLoader,
     test_dataloader: DataLoader,
     num_epochs: int,
-    lr: float = 1e-4,
+    lr: float,
     num_timesteps: int = 1000,
     noise_option: NoiseScheduleOption = NoiseScheduleOption.COSINE,
     show_loss_every: int = 4,
     checkpoint_path: str = "checkpoints/last_diffumon_checkpoint.pth",
 ) -> tuple[nn.Module, TrainingSummary]:
-    """Train a denoising diffusion probabilistic model for images
+    """Train a noise prediction model for images
 
     Args:
         model: Noise prediction model we want to train

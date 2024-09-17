@@ -15,7 +15,7 @@ from diffumon.data.downloader import (
 from diffumon.data.transforms import forward_transform
 from diffumon.diffusion.sampler import p_sampler_to_images
 from diffumon.models.unet import Unet
-from diffumon.trainers.ddpm import train_ddpm
+from diffumon.trainers.training_loop import train_noise_predictor
 from diffumon.utils import get_device, load_unet_checkpoint
 
 
@@ -46,6 +46,12 @@ def main():
     default=128,
     type=int,
     help="Batch size for training the model",
+)
+@click.option(
+    "--learning-rate",
+    default=1e-4,
+    type=float,
+    help="Learning rate for training the model",
 )
 @click.option(
     "--data-dir",
@@ -90,10 +96,11 @@ def main():
     type=int,
     help="Random seed for training the model",
 )
-def train(
+def train_noise_predictor(
     preloaded: str | None,
     num_epochs: int,
     batch_size: int,
+    learning_rate: float,
     data_dir: str | None,
     checkpoint_path: str,
     num_timesteps: int,
@@ -233,7 +240,7 @@ def train(
     val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    _, _ = train_ddpm(
+    _, _ = train_noise_predictor(
         model=Unet(
             dim=img_dim,
             num_channels=num_channels,
@@ -244,6 +251,7 @@ def train(
         num_epochs=num_epochs,
         checkpoint_path=checkpoint_path,
         num_timesteps=num_timesteps,
+        lr=learning_rate,
     )
 
 
