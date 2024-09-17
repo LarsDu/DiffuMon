@@ -10,17 +10,28 @@
 #   universal: false
 
 -e file:.
+beautifulsoup4==4.12.3
+    # via gdown
 brotli==1.1.0
     # via py7zr
+certifi==2024.8.30
+    # via requests
+charset-normalizer==3.3.2
+    # via requests
 click==8.1.7
     # via diffumon
 einops==0.8.0
     # via diffumon
 filelock==3.16.0
+    # via gdown
     # via torch
     # via triton
 fsspec==2024.9.0
     # via torch
+gdown==5.2.0
+    # via diffumon
+idna==3.10
+    # via requests
 inflate64==1.0.0
     # via py7zr
 jinja2==3.1.4
@@ -80,14 +91,20 @@ pycryptodomex==3.20.0
     # via py7zr
 pyppmd==1.1.0
     # via py7zr
+pysocks==1.7.1
+    # via requests
 python-dateutil==2.9.0.post0
     # via pandas
 pytz==2024.2
     # via pandas
 pyzstd==0.16.1
     # via py7zr
+requests==2.32.3
+    # via gdown
 six==1.16.0
     # via python-dateutil
+soupsieve==2.6
+    # via beautifulsoup4
 sympy==1.13.2
     # via torch
 texttable==1.7.0
@@ -99,9 +116,12 @@ torchvision==0.19.1
     # via diffumon
 tqdm==4.66.5
     # via diffumon
+    # via gdown
 triton==3.0.0
     # via torch
 typing-extensions==4.12.2
     # via torch
 tzdata==2024.1
     # via pandas
+urllib3==2.2.3
+    # via requests

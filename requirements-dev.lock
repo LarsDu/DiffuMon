@@ -29,6 +29,7 @@ attrs==24.2.0
 babel==2.16.0
     # via jupyterlab-server
 beautifulsoup4==4.12.3
+    # via gdown
     # via nbconvert
 black==24.8.0
 bleach==6.1.0
@@ -72,6 +73,7 @@ executing==2.1.0
 fastjsonschema==2.20.0
     # via nbformat
 filelock==3.16.0
+    # via gdown
     # via torch
     # via triton
     # via virtualenv
@@ -81,6 +83,8 @@ fqdn==1.5.1
     # via jsonschema
 fsspec==2024.9.0
     # via torch
+gdown==5.2.0
+    # via diffumon
 h11==0.14.0
     # via httpcore
 httpcore==1.0.5
@@ -273,6 +277,8 @@ pyparsing==3.1.4
     # via matplotlib
 pyppmd==1.1.0
     # via py7zr
+pysocks==1.7.1
+    # via requests
 python-dateutil==2.9.0.post0
     # via arrow
     # via jupyter-client
@@ -296,6 +302,7 @@ referencing==0.35.1
     # via jsonschema-specifications
     # via jupyter-events
 requests==2.32.3
+    # via gdown
     # via jupyterlab-server
 rfc3339-validator==0.1.4
     # via jsonschema
@@ -350,6 +357,7 @@ tornado==6.4.1
     # via terminado
 tqdm==4.66.5
     # via diffumon
+    # via gdown
 traitlets==5.14.3
     # via comm
     # via ipykernel

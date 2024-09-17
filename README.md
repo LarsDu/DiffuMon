@@ -145,3 +145,9 @@ Make sure to install the `diffumon` kernel in Jupyter to run the notebooks.
 ```bash
 python -m ipykernel install --user --name diffumon --display-name "Python Diffumon"
 ```
+
+### TODOs
+
+- [ ] Add support for more [preloaded datasets](https://pytorch.org/vision/stable/datasets.html)
+- [ ] Add smarter checkpointing and early stopping
+- [ ] Improve learning rate scheduling

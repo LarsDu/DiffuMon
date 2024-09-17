@@ -15,6 +15,7 @@ dependencies = [
     "tqdm>=4.66.5",
     "einops>=0.8.0",
     "py7zr>=0.22.0",
+    "gdown>=5.2.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
