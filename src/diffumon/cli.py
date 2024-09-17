@@ -96,7 +96,7 @@ def main():
     type=int,
     help="Random seed for training the model",
 )
-def train_noise_predictor(
+def train(
     preloaded: str | None,
     num_epochs: int,
     batch_size: int,
