@@ -12,7 +12,7 @@ Two pretrained models are provided in the `checkpoints/` directory for Fashion M
 
 ## Features
 
-* Reproducible environment with [`rye`](https://rye.astral.sh/guide/installation/). Get setup with a single command.
+* Reproducible environment with [`uv`](https://docs.astral.sh/uv/getting-started/installation). Get setup with a single command.
 * Automatic dataset download and preprocessing for certain preloaded datasets.
 * Example notebook for sampling and gif generation.
 * Train on your own dataset by providing image files in a `--data-dir` directory.
@@ -39,13 +39,13 @@ Two pretrained models are provided in the `checkpoints/` directory for Fashion M
 
 ## Setting up environment
 
-This repo uses [`rye`](https://rye.astral.sh/guide/installation/) as the package/environment manager. Make sure to install it before proceeding.
+This repo uses [`uv`](https://docs.astral.sh/uv/getting-started/installation) as the package/environment manager. Make sure to install it before proceeding.
 
 The following command will install packages and setup a virtual environment
 
 ```bash
 # Install packages
-rye sync
+uv sync
 
 # Activate virtual enviornment
 . .venv/bin/activate
