@@ -75,13 +75,13 @@ diffumon train --preloaded fashion_mnist --num-epochs 15 --learning-rate 0.001 -
 ### Train a Pokemon Generative Model on the 11k Pokemon dataset (downscaled to 64x64 pixels)
 
 ```bash
-diffumon train --preloaded pokemon_11k --num-epochs 80 --learning-rate 0.001 --img-dim 64 --batch-size 64 --checkpoint-path checkpoints/pokemon_11k_20epochs_64dim.pth
+diffumon train --preloaded pokemon_11k --num-epochs 80 --learning-rate 0.001 --img-dim 64 --batch-size 64 --checkpoint-path checkpoints/pokemon_11k_80epochs_64dim.pth
 ```
 
 ### Train a model on a dataset of your choice
 
 ```bash
-diffumon train --data-dir /path/to/dataset --num-epochs 100 --checkpoint-path checkpoints/my_dataset_100_epochs.pth
+diffumon train --data-dir /path/to/dataset --num-epochs 15 --learning-rate 0.001 --checkpoint-path checkpoints/my_dataset_15_epochs.pth
 ```
 
 Where `/path/to/dataset` should have a directory structure like the following:
