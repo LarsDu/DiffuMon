@@ -184,6 +184,9 @@ def train_noise_predictor(
                 "noise_schedule": pickle.dumps(ns),
                 "summary": pickle.dumps(summary),
                 "img_dims": list(train_dataloader.dataset[0][0].size()),
+                "num_epochs": num_epochs,
+                "lr": lr,
+                "num_timesteps": num_timesteps,
             },
             f,
         )

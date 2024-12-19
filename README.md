@@ -69,13 +69,13 @@ diffumon train --help
 ### Train a fashion MNIST model
 
 ```bash
-diffumon train --preloaded fashion_mnist --num-epochs 100 --checkpoint-path checkpoints/fashion_mnist_100epochs.pth
+diffumon train --preloaded fashion_mnist --num-epochs 15 --learning-rate 0.001 --checkpoint-path checkpoints/fashion_mnist_15epochs.pth
 ```
 
 ### Train a Pokemon Generative Model on the 11k Pokemon dataset (downscaled to 64x64 pixels)
 
 ```bash
-diffumon train --preloaded pokemon_11k --num-epochs 800 --img-dim 64 -- batch-size 64 --checkpoint-path checkpoints/pokemon_11k_800epochs_64dim.pth
+diffumon train --preloaded pokemon_11k --num-epochs 20 --learning-rate 0.001 --img-dim 64 --batch-size 64 --checkpoint-path checkpoints/pokemon_11k_20epochs_64dim.pth
 ```
 
 ### Train a model on a dataset of your choice
@@ -146,7 +146,7 @@ Make sure to install the `diffumon` kernel in Jupyter to run the notebooks.
 python -m ipykernel install --user --name diffumon --display-name "Python Diffumon"
 ```
 
-### TODOs
+### Future Goals
 
 - [ ] Add support for more [preloaded datasets](https://pytorch.org/vision/stable/datasets.html)
 - [ ] Add smarter periodic checkpointing
@@ -154,3 +154,4 @@ python -m ipykernel install --user --name diffumon --display-name "Python Diffum
 - [ ] Improve learning rate scheduling
 - [ ] Add DDIM (Denoising Diffusion Implicit Models) support
 - [ ] Add (Hydra-based?) preconfigured training options
+- [ ] Add Flow Matching Models
