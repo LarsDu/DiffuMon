@@ -1,5 +1,5 @@
+import logging
 import os
-import pickle
 import urllib.request
 
 import click
@@ -17,6 +17,17 @@ from diffumon.diffusion.sampler import p_sampler_to_images
 from diffumon.models.unet import Unet
 from diffumon.trainers.training_loop import train_noise_predictor
 from diffumon.utils import get_device, load_unet_checkpoint
+
+
+def configure_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler("project.log", mode="w"),
+        ],
+    )
 
 
 # Setup the CLI
@@ -116,8 +127,10 @@ def train(
     validation_size: float,
     seed: int,
 ) -> None:
+    configure_logging()
+    logger = logging.getLogger(__name__)
     # Code for training diffumon
-    print("Training diffumon...")
+    logger.info("Training diffumon...")
 
     # Set the random seed for reproducibility
     torch.manual_seed(seed)
@@ -128,7 +141,7 @@ def train(
     full_train_dataset: Dataset
     test_dataset: Dataset
     if preloaded:
-        print(f"Downloading and unpacking {preloaded} dataset...")
+        logger.info(f"Downloading and unpacking {preloaded} dataset...")
 
         if not os.path.exists("downloads"):
             os.makedirs("downloads")
@@ -142,7 +155,7 @@ def train(
                 )
                 test_dataset = ImageFolder(data_dir + "/test", transform=forward_t)
             case "pokemon_1k":
-                print(
+                logger.warning(
                     "WARNING! Pokemon 1k dataset is extremely small and is included solely for demonstration purposes. Expect overfitting/memorization at high epochs"
                 )
                 full_train_dataset, test_dataset = download_pokemon_sprites(
@@ -237,7 +250,7 @@ def train(
                 num_channels = 3
             case _:
                 raise ValueError(f"Unsupported preloaded datas {preloaded}")
-        print(f"num_channels changed to {num_channels} for {preloaded} dataset")
+        logger.info(f"num_channels changed to {num_channels} for {preloaded} dataset")
 
     # Split full train into train and validation
     train_dataset, val_dataset = random_split(
@@ -296,6 +309,8 @@ def sample(
     seed: int,
 ) -> None:
     # Code for sampling diffumon
+    configure_logging()
+    logger = logging.getLogger(__name__)
 
     if device is None:
         device = get_device()
@@ -304,7 +319,7 @@ def sample(
         checkpoint_path, device=device
     )
 
-    print("Generating samples...")
+    logger.info("Generating samples...")
     # NOTE: sampler set to eval mode, no gradients
     # TODO: Extract sample dims from the pretrained model
     p_sampler_to_images(

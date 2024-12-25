@@ -1,13 +1,16 @@
+import logging
 import pickle
 
 import torch
 
 from diffumon.models.unet import Unet
 
+logger = logging.getLogger(__name__)
+
 
 def get_device() -> torch.device:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
+    logger.info(f"Using device: {device}")
     return device
 
 
@@ -27,7 +30,7 @@ def load_unet_checkpoint(
     if device is None:
         device = get_device()
     # Load the trained model
-    print(f"Loading trained model from {checkpoint_path}...")
+    logger.info(f"Loading trained model from {checkpoint_path}...")
     with open(checkpoint_path, "rb") as f:
         checkpoint = torch.load(f)
         chw_dim = checkpoint["img_dims"]
@@ -44,5 +47,5 @@ def load_unet_checkpoint(
     # Load the training summary
     training_summary = pickle.loads(checkpoint.get("summary", None))
 
-    print("Model loaded.")
+    logger.info("Model loaded.")
     return model, noise_schedule, training_summary, chw_dim

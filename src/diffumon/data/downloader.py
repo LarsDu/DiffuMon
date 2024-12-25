@@ -3,6 +3,7 @@
 
 import gzip
 import hashlib
+import logging
 import os
 import random
 import shutil
@@ -18,6 +19,8 @@ from torchvision.datasets import ImageFolder
 from tqdm import tqdm
 
 from diffumon.data.transforms import forward_transform
+
+logger = logging.getLogger(__name__)
 
 
 def download_file(
@@ -35,12 +38,12 @@ def download_file(
     output_file = Path(output_file)
     # Skip if already downloaded
     if os.path.exists(output_file):
-        print(f"Found existing file at {output_file}")
+        logger.info(f"Found existing file at {output_file}")
         return
 
-    print(f"Downloading {url} to {output_file}")
+    logger.info(f"Downloading {url} to {output_file}")
     if headers is not None:
-        print(f"Using headers {headers}")
+        logger.info(f"Using headers {headers}")
     with requests.get(url, stream=True, headers=headers) as r:
         r.raise_for_status()
         # Show progress bar for the download
@@ -53,7 +56,7 @@ def download_file(
                     pbar.update(len(data))
     # Check the md5sum of the downloaded file
     if md5sum is not None:
-        print(f"Checking md5sum of downloaded file...")
+        logger.info(f"Checking md5sum of downloaded file...")
         with open(output_file, "rb") as f:
             data = f.read()
             md5 = hashlib.md5(data).hexdigest()
@@ -92,7 +95,7 @@ def unpack_tarball(
 
             for member in tar.getmembers():
                 if any(str(member.name).startswith(str(d)) for d in internal_dirs):
-                    # print(f"Extracting {member.name}")
+                    # logger.info(f"Extracting {member.name}")
                     members_to_extract.append(member)
             tar.extractall(path=output_dir, members=members_to_extract)
         else:
@@ -100,7 +103,7 @@ def unpack_tarball(
             tar.extractall(output_dir)
 
     if delete_tarball and os.path.exists(tarball_path):
-        print(f"Deleting tarball at {tarball_path}")
+        logger.info(f"Deleting tarball at {tarball_path}")
         os.remove(tarball_path)
 
 
@@ -124,7 +127,7 @@ def unpack_gzip(
             shutil.copyfileobj(f_in, f_out)
 
     if delete_gzip and gzip_file.exists():
-        print(f"Deleting gzip file at {gzip_file}")
+        logger.info(f"Deleting gzip file at {gzip_file}")
         os.remove(gzip_file)
 
 
@@ -162,7 +165,7 @@ def unpack_7z(
             z.extractall(output_dir)
 
     if delete_archive and os.path.exists(archive_file):
-        print(f"Deleting archive file at {archive_file}")
+        logger.info(f"Deleting archive file at {archive_file}")
         os.remove(archive_file)
 
 
@@ -316,8 +319,8 @@ def download_pokemon_sprites(
 
     # Short circuit if these directories already exist
     if os.path.exists(train_dir) and os.path.exists(test_dir):
-        print(f"Found existing train and test directories in {output_dir}")
-        print("Skipping download and unpacking...")
+        logger.info(f"Found existing train and test directories in {output_dir}")
+        logger.info("Skipping download and unpacking...")
         return (
             ImageFolder(train_dir, transform=transform),
             ImageFolder(test_dir, transform=transform),
@@ -347,7 +350,7 @@ def download_pokemon_sprites(
 
     images = [img for img in staging_dir.rglob(f"*{img_file_extension}")]
     if convert_alpha_to_white:
-        print("Converting images with transparency to RGB with white background")
+        logger.info("Converting images with transparency to RGB with white background")
         for image in images:
             convert_to_rgb_with_white_bg(image, image)
     random.seed(split_seed)
@@ -357,7 +360,7 @@ def download_pokemon_sprites(
     # The remaining images are for the training set
     train_images = images[int(test_size * len(images)) :]
 
-    print(
+    logger.info(
         f"Randomly partitioning images into {len(train_images)} train and {len(test_images)} test samples with seed {split_seed}"
     )
     # Copy the images to the 'train' and 'test' directories

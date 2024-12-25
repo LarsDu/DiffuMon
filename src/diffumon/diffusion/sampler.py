@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import Callable, Sequence
 
@@ -9,6 +10,8 @@ from tqdm import tqdm
 from diffumon.data.transforms import reverse_transform
 from diffumon.diffusion.scheduler import NoiseSchedule
 from diffumon.utils import get_device
+
+logger = logging.getLogger(__name__)
 
 
 @torch.no_grad()
@@ -129,7 +132,7 @@ def p_sampler_to_images(
         if output_dir is not None:
             output_dir = Path(output_dir)
             output_dir.mkdir(parents=True, exist_ok=True)
-            print(f"Saving samples to {output_dir}")
+            logger.info(f"Saving samples to {output_dir}")
             for i, pil_img in tqdm(enumerate(pil_images)):
                 pil_img.save(output_dir / f"sample_{i}.png")
 

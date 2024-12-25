@@ -149,9 +149,9 @@ python -m ipykernel install --user --name diffumon --display-name "Python Diffum
 ### Future Goals
 
 - [ ] Add support for more [preloaded datasets](https://pytorch.org/vision/stable/datasets.html)
-- [ ] Add smarter periodic checkpointing
-- [ ] Add logging
-- [ ] Improve learning rate scheduling
+- [x] Add smarter periodic checkpointing
+- [x] Add logging
+- [x] Improve learning rate scheduling
 - [ ] Add DDIM (Denoising Diffusion Implicit Models) support
-- [ ] Add (Hydra-based?) preconfigured training options
 - [ ] Add Flow Matching Models
+- [ ] Add (Hydra-based?) preconfigured training options

@@ -1,3 +1,4 @@
+import logging
 import os
 import pickle
 
@@ -16,6 +17,8 @@ from diffumon.diffusion.scheduler import (
 )
 from diffumon.trainers.summary import TrainingSummary
 from diffumon.utils import get_device
+
+logger = logging.getLogger(__name__)
 
 # Utilize high precision for matrix multiplication
 torch.set_float32_matmul_precision("high")
@@ -93,8 +96,8 @@ def train_noise_predictor(
     num_epochs: int,
     lr: float,
     num_timesteps: int = 1000,
-    noise_option: NoiseScheduleOption = NoiseScheduleOption.COSINE,
     patience: int = 4,
+    noise_option: NoiseScheduleOption = NoiseScheduleOption.COSINE,
     show_loss_every: int = 4,
     checkpoint_path: str = "checkpoints/last_diffumon_checkpoint.pth",
 ) -> tuple[nn.Module, TrainingSummary]:
@@ -109,8 +112,8 @@ def train_noise_predictor(
         lr: The learning rate for the optimizer
         seed: The random seed for training
         num_timesteps: The number of timesteps in the diffusion process
-        noise_option: The noise schedule option to use
         patience: The patience for early stopping.
+         noise_option: The noise schedule option to use
         show_loss_every: Show the batch loss every n iterations
         checkpoint_path: The path to save the trained model
 
@@ -164,7 +167,9 @@ def train_noise_predictor(
 
             # Logging and validation
             if i % show_loss_every == 0:
-                print(f"\tEpoch: {epoch+1}, Iteration: {i}, Batch Loss: {loss.item()}")
+                logger.info(
+                    f"\tEpoch: {epoch+1}, Iteration: {i}, Batch Loss: {loss.item()}"
+                )
             epoch_train_loss += loss.item()
 
         # Step the learning rate scheduler on each epoch based on total epoch loss
@@ -174,13 +179,13 @@ def train_noise_predictor(
         train_losses.append(epoch_train_loss / len(train_dataloader))
         # Compute the average validation batch loss across the validation set
         val_losses.append(eval_epoch(model, val_dataloader, ns, device=device))
-        print(
+        logger.info(
             f"\n\nEpoch: {epoch+1}, Avg Train Batch Loss: {train_losses[-1]}, Avg Val Batch Loss: {val_losses[-1]}"
         )
 
         ### Evaluate the model on the full test set (ON EVERY EPOCH)
         avg_test_batch_loss = eval_epoch(model, test_dataloader, ns, device=device)
-        print(f"\n\nTest Loss: {avg_test_batch_loss}")
+        logger.info(f"\n\nTest Loss: {avg_test_batch_loss}")
         summary = TrainingSummary(
             train_losses=np.asarray(train_losses),
             val_losses=np.asarray(val_losses),
@@ -219,7 +224,7 @@ def train_noise_predictor(
         else:
             no_improvement_count += 1
             if no_improvement_count >= patience:
-                print("Early stopping at epoch {epoch+1}")
+                logger.info("Early stopping at epoch {epoch+1}")
                 break
 
     return model, summary
