@@ -63,7 +63,7 @@ def main():
     "--checkpoint-path",
     default="checkpoints/last_diffumon_checkpoint.pth",
     type=str,
-    help="Path to save the trained model",
+    help="Path and basename for saving model checkpoints",
 )
 @click.option(
     "--num-timesteps",

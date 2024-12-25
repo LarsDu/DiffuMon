@@ -94,6 +94,7 @@ def train_noise_predictor(
     lr: float,
     num_timesteps: int = 1000,
     noise_option: NoiseScheduleOption = NoiseScheduleOption.COSINE,
+    patience: int = 4,
     show_loss_every: int = 4,
     checkpoint_path: str = "checkpoints/last_diffumon_checkpoint.pth",
 ) -> tuple[nn.Module, TrainingSummary]:
@@ -109,6 +110,7 @@ def train_noise_predictor(
         seed: The random seed for training
         num_timesteps: The number of timesteps in the diffusion process
         noise_option: The noise schedule option to use
+        patience: The patience for early stopping.
         show_loss_every: Show the batch loss every n iterations
         checkpoint_path: The path to save the trained model
 
@@ -121,11 +123,19 @@ def train_noise_predictor(
     model.to(device)
     model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode="min", factor=0.1, patience=5, verbose=True
+    )
     ns = create_noise_schedule(
         timesteps=num_timesteps, option=noise_option, device=device
     )
     train_losses = []
     val_losses = []
+
+    # Early stopping variables
+    no_improvement_count = 0
+    best_avg_test_batch_loss = 10**32 - 1
+
     for epoch in tqdm(range(num_epochs)):
         epoch_train_loss = 0
         # NOTE: Using ImageFolder, second discard term is labels
@@ -154,41 +164,61 @@ def train_noise_predictor(
 
             # Logging and validation
             if i % show_loss_every == 0:
-                print(f"\tEpoch: {epoch}, Iteration: {i}, Batch Loss: {loss.item()}")
+                print(f"\tEpoch: {epoch+1}, Iteration: {i}, Batch Loss: {loss.item()}")
             epoch_train_loss += loss.item()
+
+        # Step the learning rate scheduler on each epoch based on total epoch loss
+        scheduler.step(epoch_train_loss)
 
         # Compute the average batch loss for the epoch
         train_losses.append(epoch_train_loss / len(train_dataloader))
         # Compute the average validation batch loss across the validation set
         val_losses.append(eval_epoch(model, val_dataloader, ns, device=device))
         print(
-            f"\n\nEpoch: {epoch}, Avg Train Batch Loss: {train_losses[-1]}, Avg Val Batch Loss: {val_losses[-1]}"
+            f"\n\nEpoch: {epoch+1}, Avg Train Batch Loss: {train_losses[-1]}, Avg Val Batch Loss: {val_losses[-1]}"
         )
 
-    avg_test_batch_loss = eval_epoch(model, test_dataloader, ns, device=device)
-    print(f"\n\nTest Loss: {avg_test_batch_loss}")
-    summary = TrainingSummary(
-        train_losses=np.asarray(train_losses),
-        val_losses=np.asarray(val_losses),
-        test_loss=avg_test_batch_loss,
-    )
-
-    if not os.path.exists(os.path.dirname(checkpoint_path)):
-        os.makedirs(os.path.dirname(checkpoint_path))
-
-    # Checkpoint the model and noise schedule
-    with open(checkpoint_path, "wb") as f:
-        torch.save(
-            {
-                "model_state_dict": model.state_dict(),
-                "noise_schedule": pickle.dumps(ns),
-                "summary": pickle.dumps(summary),
-                "img_dims": list(train_dataloader.dataset[0][0].size()),
-                "num_epochs": num_epochs,
-                "lr": lr,
-                "num_timesteps": num_timesteps,
-            },
-            f,
+        ### Evaluate the model on the full test set (ON EVERY EPOCH)
+        avg_test_batch_loss = eval_epoch(model, test_dataloader, ns, device=device)
+        print(f"\n\nTest Loss: {avg_test_batch_loss}")
+        summary = TrainingSummary(
+            train_losses=np.asarray(train_losses),
+            val_losses=np.asarray(val_losses),
+            test_loss=avg_test_batch_loss,
         )
+
+        if avg_test_batch_loss < best_avg_test_batch_loss:
+            best_avg_test_batch_loss = avg_test_batch_loss
+            no_improvement_count = 0
+
+            if not os.path.exists(os.path.dirname(checkpoint_path)):
+                os.makedirs(os.path.dirname(checkpoint_path))
+
+            # Always save the previous checkpoint as backup
+            if os.path.exists(checkpoint_path):
+                # Rename the previous checkpoint
+                os.rename(
+                    checkpoint_path, checkpoint_path.replace(".pth", "_backup.pth")
+                )
+
+            # Checkpoint the model and noise schedule
+            with open(checkpoint_path, "wb") as f:
+                torch.save(
+                    {
+                        "model_state_dict": model.state_dict(),
+                        "noise_schedule": pickle.dumps(ns),
+                        "summary": pickle.dumps(summary),
+                        "img_dims": list(train_dataloader.dataset[0][0].size()),
+                        "num_epochs": num_epochs,
+                        "lr": lr,
+                        "num_timesteps": num_timesteps,
+                    },
+                    f,
+                )
+        else:
+            no_improvement_count += 1
+            if no_improvement_count >= patience:
+                print("Early stopping at epoch {epoch+1}")
+                break
 
     return model, summary
