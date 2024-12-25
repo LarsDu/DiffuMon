@@ -211,6 +211,7 @@ def train_noise_predictor(
                         "img_dims": list(train_dataloader.dataset[0][0].size()),
                         "num_epochs": num_epochs,
                         "lr": lr,
+                        "patience": patience,
                         "num_timesteps": num_timesteps,
                     },
                     f,

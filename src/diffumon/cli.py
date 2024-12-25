@@ -54,6 +54,12 @@ def main():
     help="Learning rate for training the model",
 )
 @click.option(
+    "--patience",
+    default=4,
+    type=int,
+    help="Trigger early stopping if the loss doesn't improve this many epochs",
+)
+@click.option(
     "--data-dir",
     default=None,
     type=str,
@@ -101,6 +107,7 @@ def train(
     num_epochs: int,
     batch_size: int,
     learning_rate: float,
+    patience: int,
     data_dir: str | None,
     checkpoint_path: str,
     num_timesteps: int,
@@ -251,6 +258,7 @@ def train(
         num_epochs=num_epochs,
         checkpoint_path=checkpoint_path,
         num_timesteps=num_timesteps,
+        patience=patience,
         lr=learning_rate,
     )
 
