@@ -48,7 +48,12 @@ The following command will install packages and setup a virtual environment
 uv sync
 
 # Activate virtual enviornment
+
+## Linux/Unix
 . .venv/bin/activate
+
+## Windows
+. .venv/Scripts/activate
 ```
 
 
