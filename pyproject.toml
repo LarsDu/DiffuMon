@@ -35,7 +35,11 @@ dev-dependencies = [
     "isort>=5.13.2",
     "pre-commit>=3.8.0",
     "ipykernel>=6.29.5",
+    "nbqa"
 ]
+
+[tool.nbqa]
+tools = ["black"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
