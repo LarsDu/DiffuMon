@@ -52,6 +52,7 @@ packages = ["src/diffumon"]
 
 [project.scripts]
 diffumon = 'diffumon.cli:main'
+diffumon-sample = 'diffumon.sample_app:main'
 
 [tool.isort]
 profile = "black"

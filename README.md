@@ -121,32 +121,21 @@ diffumon sample --checkpoint-path checkpoints/fashion_mnist_100epochs.pth --num-
 diffumon sample --checkpoint-path checkpoints/pokemon_11k_800epochs_32dim.pth --num-samples 32 --output-dir samples/pokemon_11k_800epochs_32dim
 ```
 
-### Generate samples with DDIM
+### Hydra-powered sampling (DDPM or DDIM)
 
-Use the deterministic DDIM sampler to cut down sampling steps:
-
-```bash
-diffumon sample \
-  --checkpoint-path checkpoints/fashion_mnist_100epochs.pth \
-  --num-samples 16 \
-  --sampler ddim \
-  --num-inference-steps 50 \
-  --output-dir samples/fashion_mnist_ddim_50
-```
-
-Add a bit of stochasticity (non‑zero eta) if you want more diverse outputs:
+Use the Hydra entrypoint to configure samplers without adding more CLI flags:
 
 ```bash
-diffumon sample \
-  --checkpoint-path checkpoints/fashion_mnist_100epochs.pth \
-  --num-samples 16 \
-  --sampler ddim \
-  --num-inference-steps 50 \
-  --ddim-eta 0.2 \
-  --output-dir samples/fashion_mnist_ddim_eta02
+python -m diffumon.sample_app \
+  checkpoint_path=checkpoints/fashion_mnist_100epochs.pth \
+  output_dir=samples/fashion_mnist_ddim \
+  num_samples=16 \
+  sampler.sampler_type=ddim \
+  sampler.num_inference_steps=50 \
+  sampler.eta=0.0
 ```
 
-Omitting `--num-inference-steps` runs DDIM across the full training schedule.
+Hydra makes overrides easy, e.g. add stochasticity with `sampler.eta=0.2` or save intermediate steps with `sampler.save_every_k_time_steps=50`.
 
 ## Useful resources
 
