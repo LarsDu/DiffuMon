@@ -13,7 +13,7 @@ from diffumon.data.downloader import (
     download_pokemon_sprites_11k,
 )
 from diffumon.data.transforms import forward_transform
-from diffumon.diffusion.sampler import p_sampler_to_images
+from diffumon.diffusion.sampler import SamplerType, p_sampler_to_images
 from diffumon.models.unet import Unet
 from diffumon.trainers.training_loop import train_noise_predictor
 from diffumon.utils import get_device, load_unet_checkpoint
@@ -280,12 +280,33 @@ def train(
 @click.option(
     "--seed", default=1999, type=int, help="Random seed for generating samples"
 )
+@click.option(
+    "--sampler",
+    default="ddpm",
+    type=click.Choice([s.value for s in SamplerType]),
+    help="Sampling strategy to use for denoising.",
+)
+@click.option(
+    "--ddim-eta",
+    default=0.0,
+    type=float,
+    help="Amount of stochasticity for DDIM sampling (0.0 = deterministic). Ignored for DDPM.",
+)
+@click.option(
+    "--num-inference-steps",
+    default=None,
+    type=int,
+    help="Number of inference steps for DDIM sampling. Defaults to the full schedule when omitted.",
+)
 def sample(
     num_samples: int,
     output_dir: str,
     checkpoint_path: str,
     device: str | None,
     seed: int,
+    sampler: str,
+    ddim_eta: float,
+    num_inference_steps: int | None,
 ) -> None:
     # Code for sampling diffumon
 
@@ -306,6 +327,9 @@ def sample(
         chw_dims=chw_dims,
         seed=seed,
         output_dir=output_dir,
+        sampler_type=SamplerType(sampler),
+        eta=ddim_eta,
+        num_inference_steps=num_inference_steps,
         device=device,
     )
 

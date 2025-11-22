@@ -121,6 +121,33 @@ diffumon sample --checkpoint-path checkpoints/fashion_mnist_100epochs.pth --num-
 diffumon sample --checkpoint-path checkpoints/pokemon_11k_800epochs_32dim.pth --num-samples 32 --output-dir samples/pokemon_11k_800epochs_32dim
 ```
 
+### Generate samples with DDIM
+
+Use the deterministic DDIM sampler to cut down sampling steps:
+
+```bash
+diffumon sample \
+  --checkpoint-path checkpoints/fashion_mnist_100epochs.pth \
+  --num-samples 16 \
+  --sampler ddim \
+  --num-inference-steps 50 \
+  --output-dir samples/fashion_mnist_ddim_50
+```
+
+Add a bit of stochasticity (non‑zero eta) if you want more diverse outputs:
+
+```bash
+diffumon sample \
+  --checkpoint-path checkpoints/fashion_mnist_100epochs.pth \
+  --num-samples 16 \
+  --sampler ddim \
+  --num-inference-steps 50 \
+  --ddim-eta 0.2 \
+  --output-dir samples/fashion_mnist_ddim_eta02
+```
+
+Omitting `--num-inference-steps` runs DDIM across the full training schedule.
+
 ## Useful resources
 
 * [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239) - The original paper by Ho et al. (2020)
@@ -151,12 +178,28 @@ Make sure to install the `diffumon` kernel in Jupyter to run the notebooks.
 python -m ipykernel install --user --name diffumon --display-name "Python Diffumon"
 ```
 
+Inside notebooks you can switch samplers just like the CLI:
+
+```python
+from diffumon.diffusion.sampler import SamplerType, p_sampler_to_images
+
+samples = p_sampler_to_images(
+    model=trained_model,
+    ns=noise_schedule,
+    num_samples=8,
+    chw_dims=[1, 28, 28],
+    sampler_type=SamplerType.DDIM,
+    num_inference_steps=50,
+    eta=0.0,
+)
+```
+
 ### Future Goals
 
 - [ ] Add support for more [preloaded datasets](https://pytorch.org/vision/stable/datasets.html)
 - [ ] Add smarter periodic checkpointing
 - [ ] Add logging
 - [ ] Improve learning rate scheduling
-- [ ] Add DDIM (Denoising Diffusion Implicit Models) support
+- [x] Add DDIM (Denoising Diffusion Implicit Models) support
 - [ ] Add (Hydra-based?) preconfigured training options
 - [ ] Add Flow Matching Models
