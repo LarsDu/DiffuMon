@@ -9,8 +9,16 @@ readme = "README.md"
 requires-python = ">= 3.10"
 
 dependencies = [
-    "torch==2.4.1+cu121",
-    "torchvision==0.19.1+cu121",
+    # --- PyTorch, platform-specific ---
+    # CUDA on Windows / Linux
+    "torch==2.4.1+cu121 ; platform_system != 'Darwin'",
+    "torchvision==0.19.1+cu121 ; platform_system != 'Darwin'",
+
+    # No CUDA tag on macOS (Apple Silicon uses MPS)
+    "torch==2.4.1 ; platform_system == 'Darwin'",
+    "torchvision==0.19.1 ; platform_system == 'Darwin'",
+
+    # --- non-pytorch deps ---
     "numpy>=2.1.1",
     "pillow>=10.4.0",
     "pandas>=2.2.2",
