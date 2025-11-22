@@ -1,8 +1,8 @@
 # DiffuMon
 
-Basic Denoising Diffusion Probabilistic Model image generator implemented in PyTorch.
+Basic Denoising Diffusion image generator implemented in PyTorch.
 
-Reproduces [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239).
+Reproduces [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239). [DDIM](https://arxiv.org/abs/2010.02502) sampling option also available.
 
 Developed as an educational project, with the aim of having a simpler PyTorch implementation and development setup than other DDPM implementations available. Small and lean enough to train on a commodity GPU (in this case my Geforce 4070 Ti).
 
@@ -46,6 +46,10 @@ The following command will install packages and setup a virtual environment
 ```bash
 # Install packages
 uv sync
+
+## (Alternatively) Install all packages with added Nvidia CUDA support
+uv sync --extras cuda
+
 
 # Activate virtual enviornment
 
@@ -121,6 +125,33 @@ diffumon sample --checkpoint-path checkpoints/fashion_mnist_100epochs.pth --num-
 diffumon sample --checkpoint-path checkpoints/pokemon_11k_800epochs_32dim.pth --num-samples 32 --output-dir samples/pokemon_11k_800epochs_32dim
 ```
 
+### Generate samples with DDIM Sampler
+
+Use the deterministic DDIM sampler to cut down sampling steps:
+
+```bash
+diffumon sample \
+  --checkpoint-path checkpoints/fashion_mnist_100epochs.pth \
+  --num-samples 16 \
+  --sampler ddim \
+  --num-inference-steps 50 \
+  --output-dir samples/fashion_mnist_ddim_50
+```
+
+Add a bit of stochasticity (non‑zero eta) if you want more diverse outputs:
+
+```bash
+diffumon sample \
+  --checkpoint-path checkpoints/fashion_mnist_100epochs.pth \
+  --num-samples 16 \
+  --sampler ddim \
+  --num-inference-steps 50 \
+  --ddim-eta 0.2 \
+  --output-dir samples/fashion_mnist_ddim_eta02
+```
+
+Omitting `--num-inference-steps` runs DDIM across the full training schedule.
+
 ## Useful resources
 
 * [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239) - The original paper by Ho et al. (2020)
@@ -151,12 +182,29 @@ Make sure to install the `diffumon` kernel in Jupyter to run the notebooks.
 python -m ipykernel install --user --name diffumon --display-name "Python Diffumon"
 ```
 
+Inside notebooks you can switch samplers just like the CLI:
+
+```python
+from diffumon.diffusion.sampler import SamplerType, p_sampler_to_images
+
+samples = p_sampler_to_images(
+    model=trained_model,
+    ns=noise_schedule,
+    num_samples=8,
+    chw_dims=[1, 28, 28],
+    sampler_type=SamplerType.DDIM,
+    num_inference_steps=50,
+    eta=0.0,
+)
+```
+
 ### Future Goals
 
 - [ ] Add support for more [preloaded datasets](https://pytorch.org/vision/stable/datasets.html)
 - [ ] Add smarter periodic checkpointing
 - [ ] Add logging
 - [ ] Improve learning rate scheduling
-- [ ] Add DDIM (Denoising Diffusion Implicit Models) support
+- [x] Add DDIM (Denoising Diffusion Implicit Models) support
 - [ ] Add (Hydra-based?) preconfigured training options
 - [ ] Add Flow Matching Models
+- [ ] Make saved checkpoint loadable without CUDA

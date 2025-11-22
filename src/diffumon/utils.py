@@ -1,14 +1,17 @@
-import pickle
-
+import io
 import torch
 
 from diffumon.models.unet import Unet
 
 
 def get_device() -> torch.device:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
-    return device
+    torch_device = 'cpu'
+    if torch.cuda.is_available():
+        torch_device = 'cuda'
+    if torch.backends.mps.is_available():
+        torch_device = 'mps'
+    print(f"Using device {torch_device}")
+    return torch.device(torch_device)
 
 
 def load_unet_checkpoint(
@@ -29,10 +32,11 @@ def load_unet_checkpoint(
     # Load the trained model
     print(f"Loading trained model from {checkpoint_path}...")
     with open(checkpoint_path, "rb") as f:
-        checkpoint = torch.load(f)
+        # NOTE: Always load on CPU and move to explicit device later
+        checkpoint = torch.load(f, map_location='cpu')
         chw_dim = checkpoint["img_dims"]
-    noise_schedule = pickle.loads(checkpoint["noise_schedule"])
-
+    noise_schedule = torch.load(io.BytesIO(checkpoint["noise_schedule"]), map_location="cpu")
+    noise_schedule.to(device)
     model = Unet(
         dim=chw_dim[1],
         num_channels=chw_dim[0],

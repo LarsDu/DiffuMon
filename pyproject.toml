@@ -5,29 +5,30 @@ description = "Basic Denoising Diffusion Probabilistic Model image generator imp
 authors = [
     { name = "Larry Du", email = "larrydu88@gmail.com" }
 ]
+readme = "README.md"
+requires-python = ">= 3.10"
+
 dependencies = [
-    "torch>=2.4.1",
+    "torch==2.4.1",
+    "torchvision==0.19.1",
     "numpy>=2.1.1",
     "pillow>=10.4.0",
-    "torchvision>=0.19.1",
     "pandas>=2.2.2",
     "click>=8.1.7",
     "tqdm>=4.66.5",
     "einops>=0.8.0",
     "py7zr>=0.22.0",
     "gdown>=5.2.0",
+    "matplotlib>=3.10.7",
 ]
-readme = "README.md"
-requires-python = ">= 3.10"
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[project.optional-dependencies]
+cuda = [
+    "torch==2.4.1+cu121",
+    "torchvision==0.19.1+cu121",
+]
 
-[tool.uv]
-managed = true
-
-dev-dependencies = [
+dependency-groups.dev = [
     "black[jupyter]>=24.8.0",
     "ruff>=0.6.4",
     "matplotlib>=3.9.2",
@@ -37,6 +38,23 @@ dev-dependencies = [
     "ipykernel>=6.29.5",
     "nbqa"
 ]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+managed = true
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu121", extra = "cuda" }
+torchvision = { index = "pytorch-cu121", extra = "cuda" }
 
 [tool.nbqa]
 tools = ["black"]
