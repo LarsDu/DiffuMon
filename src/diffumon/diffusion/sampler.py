@@ -95,6 +95,7 @@ class DDIMSampler:
         deduped = list(dict.fromkeys(int(step.item()) for step in raw_steps))
         return list(reversed(deduped))
 
+    @torch.no_grad
     def sample(
         self,
         model: nn.Module,
@@ -122,7 +123,10 @@ class DDIMSampler:
             alpha_t = ns.alphas_cum_prod[t]
             sqrt_alpha_t = ns.sqrt_alphas_cum_prod[t]
             sqrt_one_minus_alpha_t = ns.sqrt_one_minus_alphas_cum_prod[t]
+
             pred_x0 = (x_t - sqrt_one_minus_alpha_t * pred_noise) / sqrt_alpha_t
+            pred_x0 = pred_x0.clamp(-1.0, 1.0)
+            pred_noise = (x_t - sqrt_alpha_t * pred_x0) / sqrt_one_minus_alpha_t
 
             is_last_step = idx == len(timesteps) - 1
             if is_last_step:
@@ -130,17 +134,14 @@ class DDIMSampler:
             else:
                 prev_t = timesteps[idx + 1]
                 alpha_prev = ns.alphas_cum_prod[prev_t]
-                sigma = (
-                    self.eta
-                    * torch.sqrt(
-                        (1 - alpha_prev) / (1 - alpha_t)
-                        * (1 - alpha_t / alpha_prev)
-                    )
+
+                sigma = self.eta * torch.sqrt(
+                    (1 - alpha_prev) / (1 - alpha_t) * (1 - alpha_t / alpha_prev)
                 )
-                noise_dir = torch.sqrt(
-                    torch.clamp(1 - alpha_prev - sigma**2, min=0.0)
-                ) * pred_noise
-                noise = sigma * torch.randn_like(x_t, device=x_t.device)
+
+                noise_dir = torch.sqrt(torch.clamp(1 - alpha_prev - sigma**2, min=0.0)) * pred_noise
+                noise = sigma * torch.randn_like(x_t)
+
                 x_t = torch.sqrt(alpha_prev) * pred_x0 + noise_dir + noise
 
             if is_last_step or (
@@ -164,7 +165,7 @@ def create_sampler(
             return DDIMSampler(eta=eta, num_inference_steps=num_inference_steps)
     raise ValueError(f"Unsupported sampler type: {sampler_type}")
 
-
+@torch.no_grad
 def p_sampler_to_images(
     model: nn.Module,
     ns: NoiseSchedule,
