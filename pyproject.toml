@@ -9,16 +9,17 @@ readme = "README.md"
 requires-python = ">= 3.10"
 
 dependencies = [
-    "torch>=2.4.1",
+    "torch==2.4.1+cu121",
+    "torchvision==0.19.1+cu121",
     "numpy>=2.1.1",
     "pillow>=10.4.0",
-    "torchvision>=0.19.1",
     "pandas>=2.2.2",
     "click>=8.1.7",
     "tqdm>=4.66.5",
     "einops>=0.8.0",
     "py7zr>=0.22.0",
     "gdown>=5.2.0",
+    "matplotlib>=3.10.7",
 ]
 
 dependency-groups.dev = [
@@ -39,6 +40,15 @@ build-backend = "hatchling.build"
 
 [tool.uv]
 managed = true
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu121" }
+torchvision = { index = "pytorch-cu121" }
 
 [tool.nbqa]
 tools = ["black"]
