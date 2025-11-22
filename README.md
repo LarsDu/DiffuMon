@@ -207,3 +207,4 @@ samples = p_sampler_to_images(
 - [x] Add DDIM (Denoising Diffusion Implicit Models) support
 - [ ] Add (Hydra-based?) preconfigured training options
 - [ ] Add Flow Matching Models
+- [ ] Make saved checkpoint loadable without CUDA
