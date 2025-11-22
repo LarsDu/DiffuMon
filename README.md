@@ -121,7 +121,7 @@ diffumon sample --checkpoint-path checkpoints/fashion_mnist_100epochs.pth --num-
 diffumon sample --checkpoint-path checkpoints/pokemon_11k_800epochs_32dim.pth --num-samples 32 --output-dir samples/pokemon_11k_800epochs_32dim
 ```
 
-### Generate samples with DDIM
+### Generate samples with DDIM Sampler
 
 Use the deterministic DDIM sampler to cut down sampling steps:
 
