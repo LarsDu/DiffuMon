@@ -36,7 +36,7 @@ def load_unet_checkpoint(
         # NOTE: Always load on CPU and move to explicit device later
         checkpoint = torch.load(f, map_location='cpu')
         chw_dim = checkpoint["img_dims"]
-    noise_schedule = pickle.loads(checkpoint["noise_schedule"])
+    noise_schedule = pickle.loads(checkpoint["noise_schedule"], map_location='cpu')
 
     model = Unet(
         dim=chw_dim[1],
