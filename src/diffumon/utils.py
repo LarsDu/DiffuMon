@@ -6,9 +6,13 @@ from diffumon.models.unet import Unet
 
 
 def get_device() -> torch.device:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
-    return device
+    torch_device = 'cpu'
+    if torch.cuda.is_available():
+        torch_device = 'cuda'
+    if torch.backends.mps.is_available():
+        torch_device = 'mps'
+    print(f"Using device {torch_device}")
+    return torch.device(torch_device)
 
 
 def load_unet_checkpoint(
