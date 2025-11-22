@@ -1,8 +1,8 @@
 # DiffuMon
 
-Basic Denoising Diffusion Probabilistic Model image generator implemented in PyTorch.
+Basic Denoising Diffusion image generator implemented in PyTorch.
 
-Reproduces [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239).
+Reproduces [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239). [DDIM](https://arxiv.org/abs/2010.02502) sampling option also available.
 
 Developed as an educational project, with the aim of having a simpler PyTorch implementation and development setup than other DDPM implementations available. Small and lean enough to train on a commodity GPU (in this case my Geforce 4070 Ti).
 
@@ -46,6 +46,10 @@ The following command will install packages and setup a virtual environment
 ```bash
 # Install packages
 uv sync
+
+## (Alternatively) Install all packages with added Nvidia CUDA support
+uv sync --extras cuda
+
 
 # Activate virtual enviornment
 
