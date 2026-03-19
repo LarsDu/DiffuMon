@@ -18,5 +18,4 @@ class SampleConfig:
     num_samples: int = 32
     seed: int = 1999
     device: str | None = None
-    chw_dims_override: list[int] | None = None
     sampler: SamplerConfig = field(default_factory=SamplerConfig)
