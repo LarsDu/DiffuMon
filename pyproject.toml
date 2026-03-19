@@ -28,7 +28,8 @@ cuda = [
     "torchvision==0.19.1+cu121",
 ]
 
-dependency-groups.dev = [
+[dependency-groups]
+dev = [
     "black[jupyter]>=24.8.0",
     "ruff>=0.6.4",
     "matplotlib>=3.9.2",
