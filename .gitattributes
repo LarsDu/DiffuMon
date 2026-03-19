@@ -1,2 +1,5 @@
 # Don't scan Jupyter Notebooks for language statistics
 notebooks/* linguist-vendored
+checkpoints/pokemon_11k_1096epochs_64dim.pth filter=lfs diff=lfs merge=lfs -text
+checkpoints/pokemon_11k_448epochs_64dim.pth filter=lfs diff=lfs merge=lfs -text
+checkpoints/fashion_mnist_100epochs.pth filter=lfs diff=lfs merge=lfs -text
