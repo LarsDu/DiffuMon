@@ -85,7 +85,7 @@ diffumon-train data.preloaded=fashion_mnist num_epochs=15 learning_rate=0.001 ch
 ### Train a Pokemon Generative Model on the 11k Pokemon dataset (downscaled to 64x64 pixels)
 
 ```bash
-diffumon-train data.preloaded=pokemon_11k num_epochs=80 learning_rate=0.001 data.img_dim=64 batch_size=64 checkpoint_path=checkpoints/pokemon_11k_80epochs_64dim.pth
+diffumon-train data.preloaded=pokemon_11k num_epochs=448 learning_rate=0.001 data.img_dim=64 batch_size=64 checkpoint_path=checkpoints/pokemon_11k_448epochs_64dim.pth
 ```
 
 ### Train a model on a dataset of your choice
@@ -123,7 +123,7 @@ diffumon-sample checkpoint_path=checkpoints/fashion_mnist_100epochs.pth num_samp
 ### Generate samples from the trained Pokemon Generative Model
 
 ```bash
-diffumon-sample checkpoint_path=checkpoints/pokemon_11k_80epochs_64dim.pth num_samples=32 output_dir=samples/pokemon_11k_80epochs_64dim_out1
+diffumon-sample checkpoint_path=checkpoints/pokemon_11k_448epochs_64dim.pth num_samples=32 output_dir=samples/pokemon_11k_448epochs_64dim_out1
 ```
 
 ### Generate samples with DDIM Sampler
