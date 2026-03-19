@@ -15,7 +15,7 @@ Two pretrained models are provided in the `checkpoints/` directory for Fashion M
 * Reproducible environment with [`uv`](https://docs.astral.sh/uv/getting-started/installation). Get setup with a single command.
 * Automatic dataset download and preprocessing for certain preloaded datasets.
 * Example notebook for sampling and gif generation.
-* Train on your own dataset by providing image files in a `--data-dir` directory.
+* Train on your own dataset by providing image files in a `data.data_dir=/path/to/dataset` directory.
 
 ## Example Generations
 
@@ -61,36 +61,37 @@ uv sync --extras cuda
 ```
 
 
-## Access the entrypoint
+## Access the entrypoints
 
-Once installed, the model can be trained and used via the `diffumon` command
+Once installed, training and sampling are available as separate commands. Both use [Hydra](https://hydra.cc/) for configuration — override any config value with `key=value` syntax.
 
 ```bash
-diffumon --help
+diffumon-train --help
+diffumon-sample --help
 ```
 
 ## Train a model
 
 ```bash
-diffumon train --help
+diffumon-train --help
 ```
 
 ### Train a fashion MNIST model
 
 ```bash
-diffumon train --preloaded fashion_mnist --num-epochs 15 --learning-rate 0.001 --checkpoint-path checkpoints/fashion_mnist_15epochs.pth
+diffumon-train data.preloaded=fashion_mnist num_epochs=15 learning_rate=0.001 checkpoint_path=checkpoints/fashion_mnist_15epochs.pth
 ```
 
 ### Train a Pokemon Generative Model on the 11k Pokemon dataset (downscaled to 64x64 pixels)
 
 ```bash
-diffumon train --preloaded pokemon_11k --num-epochs 80 --learning-rate 0.001 --img-dim 64 --batch-size 64 --checkpoint-path checkpoints/pokemon_11k_80epochs_64dim.pth
+diffumon-train data.preloaded=pokemon_11k num_epochs=80 learning_rate=0.001 data.img_dim=64 batch_size=64 checkpoint_path=checkpoints/pokemon_11k_80epochs_64dim.pth
 ```
 
 ### Train a model on a dataset of your choice
 
 ```bash
-diffumon train --data-dir /path/to/dataset --num-epochs 15 --learning-rate 0.001 --checkpoint-path checkpoints/my_dataset_15_epochs.pth
+diffumon-train data.preloaded=custom data.data_dir=/path/to/dataset num_epochs=15 learning_rate=0.001 checkpoint_path=checkpoints/my_dataset_15_epochs.pth
 ```
 
 Where `/path/to/dataset` should have a directory structure like the following:
@@ -110,47 +111,47 @@ Where `/path/to/dataset` should have a directory structure like the following:
 ## Generate samples
 
 ```bash
-diffumon sample --help
+diffumon-sample --help
 ```
 
 ### Generate samples from the trained fashion MNIST model
 
 ```bash
-diffumon sample --checkpoint-path checkpoints/fashion_mnist_100epochs.pth --num-samples 32 --output-dir samples/fashion_mnist_100epochs
+diffumon-sample checkpoint_path=checkpoints/fashion_mnist_100epochs.pth num_samples=32 output_dir=samples/fashion_mnist_100epochs
 ```
 
 ### Generate samples from the trained Pokemon Generative Model
 
 ```bash
-diffumon sample --checkpoint-path checkpoints/pokemon_11k_800epochs_32dim.pth --num-samples 32 --output-dir samples/pokemon_11k_800epochs_32dim
+diffumon-sample checkpoint_path=checkpoints/pokemon_11k_800epochs_32dim.pth num_samples=32 output_dir=samples/pokemon_11k_800epochs_32dim
 ```
 
 ### Generate samples with DDIM Sampler
 
-Use the deterministic DDIM sampler to cut down sampling steps:
+Use the `sampler=ddim` config group to switch to the deterministic DDIM sampler:
 
 ```bash
-diffumon sample \
-  --checkpoint-path checkpoints/fashion_mnist_100epochs.pth \
-  --num-samples 16 \
-  --sampler ddim \
-  --num-inference-steps 50 \
-  --output-dir samples/fashion_mnist_ddim_50
+diffumon-sample \
+  checkpoint_path=checkpoints/fashion_mnist_100epochs.pth \
+  num_samples=16 \
+  sampler=ddim \
+  sampler.num_inference_steps=50 \
+  output_dir=samples/fashion_mnist_ddim_50
 ```
 
-Add a bit of stochasticity (non‑zero eta) if you want more diverse outputs:
+Add a bit of stochasticity (non-zero eta) if you want more diverse outputs:
 
 ```bash
-diffumon sample \
-  --checkpoint-path checkpoints/fashion_mnist_100epochs.pth \
-  --num-samples 16 \
-  --sampler ddim \
-  --num-inference-steps 50 \
-  --ddim-eta 0.2 \
-  --output-dir samples/fashion_mnist_ddim_eta02
+diffumon-sample \
+  checkpoint_path=checkpoints/fashion_mnist_100epochs.pth \
+  num_samples=16 \
+  sampler=ddim \
+  sampler.num_inference_steps=50 \
+  sampler.eta=0.2 \
+  output_dir=samples/fashion_mnist_ddim_eta02
 ```
 
-Omitting `--num-inference-steps` runs DDIM across the full training schedule.
+Omitting `sampler.num_inference_steps` runs DDIM across the full training schedule.
 
 ## Useful resources
 
@@ -182,7 +183,7 @@ Make sure to install the `diffumon` kernel in Jupyter to run the notebooks.
 python -m ipykernel install --user --name diffumon --display-name "Python Diffumon"
 ```
 
-Inside notebooks you can switch samplers just like the CLI:
+Inside notebooks you can switch samplers programmatically:
 
 ```python
 from diffumon.diffusion.sampler import SamplerType, p_sampler_to_images
@@ -205,6 +206,6 @@ samples = p_sampler_to_images(
 - [ ] Add logging
 - [ ] Improve learning rate scheduling
 - [x] Add DDIM (Denoising Diffusion Implicit Models) support
-- [ ] Add (Hydra-based?) preconfigured training options
+- [x] Add Hydra-based configuration
 - [ ] Add Flow Matching Models
 - [ ] Make saved checkpoint loadable without CUDA
