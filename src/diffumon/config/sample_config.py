@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 from omegaconf import MISSING
@@ -7,9 +7,19 @@ from omegaconf import MISSING
 @dataclass
 class SamplerConfig:
     type: str = MISSING
+    save_every_k_time_steps: int = -1
+
+
+@dataclass
+class DDPMSamplerConfig(SamplerConfig):
+    type: str = "ddpm"
+
+
+@dataclass
+class DDIMSamplerConfig(SamplerConfig):
+    type: str = "ddim"
     eta: float = 0.0
     num_inference_steps: Optional[int] = None
-    save_every_k_time_steps: int = -1
 
 
 @dataclass

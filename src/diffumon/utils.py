@@ -1,4 +1,6 @@
 import io
+import pickle
+
 import torch
 
 from diffumon.models.unet import Unet
@@ -41,7 +43,10 @@ def load_unet_checkpoint(
         dim=chw_dim[1],
         num_channels=chw_dim[0],
     )
-    model.load_state_dict(checkpoint["model_state_dict"])
+    if "ema_model_state_dict" in checkpoint:
+        model.load_state_dict(checkpoint["ema_model_state_dict"])
+    else:
+        model.load_state_dict(checkpoint["model_state_dict"])
     model.to(device)
     noise_schedule.to(device)
 

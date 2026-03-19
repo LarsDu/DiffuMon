@@ -1,9 +1,9 @@
 import os
 
 import hydra
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
-from diffumon.diffusion.sampler import SamplerType, p_sampler_to_images
+from diffumon.diffusion.sampler import SamplerType, create_sampler, p_sampler_to_images
 from diffumon.utils import get_device, load_unet_checkpoint
 
 # Ensure structured configs are registered
@@ -23,17 +23,22 @@ def sample_app(cfg: DictConfig) -> None:
         cfg.checkpoint_path, device=device
     )
 
+    # Build sampler from config, passing only sampler-specific params
+    sampler_params = OmegaConf.to_container(cfg.sampler, resolve=True)
+    sampler_type = SamplerType(sampler_params.pop("type"))
+    sampler_params.pop("save_every_k_time_steps", None)
+    sampler = create_sampler(sampler_type, **sampler_params)
+
     print("Generating samples...")
     p_sampler_to_images(
         model=model,
         ns=noise_schedule,
+        sampler=sampler,
         num_samples=cfg.num_samples,
         chw_dims=chw_dims,
         seed=cfg.seed,
         output_dir=cfg.output_dir,
-        sampler_type=SamplerType(cfg.sampler.type),
-        eta=cfg.sampler.eta,
-        num_inference_steps=cfg.sampler.num_inference_steps,
+        save_every_k_time_steps=cfg.sampler.save_every_k_time_steps,
         device=device,
     )
 
