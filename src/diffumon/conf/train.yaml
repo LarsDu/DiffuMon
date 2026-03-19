@@ -11,3 +11,4 @@ learning_rate: 1e-4
 checkpoint_path: checkpoints/last_diffumon_checkpoint.pth
 num_timesteps: 1000
 seed: 1999
+ema_decay: 0.9999

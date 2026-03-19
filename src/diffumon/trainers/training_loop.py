@@ -14,6 +14,7 @@ from diffumon.diffusion.scheduler import (
     NoiseScheduleOption,
     create_noise_schedule,
 )
+from diffumon.models.ema import EMAModel
 from diffumon.trainers.summary import TrainingSummary
 from diffumon.utils import get_device
 
@@ -96,6 +97,7 @@ def train_noise_predictor(
     noise_option: NoiseScheduleOption = NoiseScheduleOption.COSINE,
     show_loss_every: int = 4,
     checkpoint_path: str = "checkpoints/last_diffumon_checkpoint.pth",
+    ema_decay: float = 0.9999,
 ) -> tuple[nn.Module, TrainingSummary]:
     """Train a noise prediction model for images
 
@@ -120,6 +122,7 @@ def train_noise_predictor(
     device = get_device()
     model.to(device)
     model.train()
+    ema = EMAModel(model, decay=ema_decay)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     ns = create_noise_schedule(
         timesteps=num_timesteps, option=noise_option, device=device
@@ -151,6 +154,7 @@ def train_noise_predictor(
 
             # Update the weights
             optimizer.step()
+            ema.update(model)
 
             # Logging and validation
             if i % show_loss_every == 0:
@@ -160,12 +164,12 @@ def train_noise_predictor(
         # Compute the average batch loss for the epoch
         train_losses.append(epoch_train_loss / len(train_dataloader))
         # Compute the average validation batch loss across the validation set
-        val_losses.append(eval_epoch(model, val_dataloader, ns, device=device))
+        val_losses.append(eval_epoch(ema, val_dataloader, ns, device=device))
         print(
             f"\n\nEpoch: {epoch}, Avg Train Batch Loss: {train_losses[-1]}, Avg Val Batch Loss: {val_losses[-1]}"
         )
 
-    avg_test_batch_loss = eval_epoch(model, test_dataloader, ns, device=device)
+    avg_test_batch_loss = eval_epoch(ema, test_dataloader, ns, device=device)
     print(f"\n\nTest Loss: {avg_test_batch_loss}")
     summary = TrainingSummary(
         train_losses=np.asarray(train_losses),
@@ -181,6 +185,7 @@ def train_noise_predictor(
         torch.save(
             {
                 "model_state_dict": model.state_dict(),
+                "ema_model_state_dict": ema.ema_model.state_dict(),
                 "noise_schedule": pickle.dumps(ns),
                 "summary": pickle.dumps(summary),
                 "img_dims": list(train_dataloader.dataset[0][0].size()),

@@ -165,6 +165,7 @@ def train_app(cfg: DictConfig) -> None:
         checkpoint_path=cfg.checkpoint_path,
         num_timesteps=cfg.num_timesteps,
         lr=cfg.learning_rate,
+        ema_decay=cfg.ema_decay,
     )
 
 

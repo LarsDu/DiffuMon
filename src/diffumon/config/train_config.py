@@ -22,3 +22,4 @@ class TrainConfig:
     checkpoint_path: str = "checkpoints/last_diffumon_checkpoint.pth"
     num_timesteps: int = 1000
     seed: int = 1999
+    ema_decay: float = 0.9999

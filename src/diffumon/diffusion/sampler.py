@@ -152,31 +152,25 @@ class DDIMSampler:
         return samples
 
 
-def create_sampler(
-    sampler_type: SamplerType,
-    *,
-    eta: float = 0.0,
-    num_inference_steps: int | None = None,
-) -> Sampler:
+def create_sampler(sampler_type: SamplerType, **kwargs) -> Sampler:
     match sampler_type:
         case SamplerType.DDPM:
             return DDPMSampler()
         case SamplerType.DDIM:
-            return DDIMSampler(eta=eta, num_inference_steps=num_inference_steps)
+            return DDIMSampler(**kwargs)
     raise ValueError(f"Unsupported sampler type: {sampler_type}")
+
 
 @torch.no_grad
 def p_sampler_to_images(
     model: nn.Module,
     ns: NoiseSchedule,
+    sampler: Sampler,
     num_samples: int,
     chw_dims: Sequence[int],
     save_every_k_time_steps: int = -1,
     seed: int = 1999,
     output_dir: str | Path | None = None,
-    sampler_type: SamplerType = SamplerType.DDPM,
-    eta: float = 0.0,
-    num_inference_steps: int | None = None,
     device: torch.device | None = None,
 ) -> list[list[PILImage]]:
     """Sample from the model's prior distribution and convert to images.
@@ -184,14 +178,12 @@ def p_sampler_to_images(
     Args:
         model: The noise prediction model.
         ns: The noise schedule for the diffusion process.
+        sampler: The sampler instance to use for generating samples.
         num_samples: The number of samples to generate.
         chw_dims: The dimensions of the samples to generate. For images, typically [channels, height, width].
         save_every_k_time_steps: Save the samples every k timesteps.
         seed: The random seed for generating samples.
         output_dir: The directory to save the generated samples.
-        sampler_type: Select between DDPM or DDIM sampling.
-        eta: Amount of stochasticity for DDIM (0.0 = deterministic). Ignored for DDPM.
-        num_inference_steps: Number of inference steps for DDIM. Defaults to full schedule when None. Ignored for DDPM.
         device: The device to use for sampling.
 
     Returns:
@@ -199,10 +191,6 @@ def p_sampler_to_images(
     """
     if device is None:
         device = get_device()
-
-    sampler = create_sampler(
-        sampler_type=sampler_type, eta=eta, num_inference_steps=num_inference_steps
-    )
 
     sample_batches: list[Tensor] = sampler.sample(
         model=model,
