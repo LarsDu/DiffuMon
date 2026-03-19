@@ -123,7 +123,7 @@ diffumon-sample checkpoint_path=checkpoints/fashion_mnist_100epochs.pth num_samp
 ### Generate samples from the trained Pokemon Generative Model
 
 ```bash
-diffumon-sample checkpoint_path=checkpoints/pokemon_11k_800epochs_32dim.pth num_samples=32 output_dir=samples/pokemon_11k_800epochs_32dim
+diffumon-sample checkpoint_path=checkpoints/pokemon_11k_80epochs_64dim.pth num_samples=32 output_dir=samples/pokemon_11k_80epochs_64dim_out1
 ```
 
 ### Generate samples with DDIM Sampler

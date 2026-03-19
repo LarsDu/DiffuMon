@@ -7,11 +7,11 @@ from diffumon.models.unet import Unet
 
 
 def get_device() -> torch.device:
-    torch_device = 'cpu'
+    torch_device = "cpu"
     if torch.cuda.is_available():
-        torch_device = 'cuda'
+        torch_device = "cuda"
     if torch.backends.mps.is_available():
-        torch_device = 'mps'
+        torch_device = "mps"
     print(f"Using device {torch_device}")
     return torch.device(torch_device)
 
@@ -35,9 +35,9 @@ def load_unet_checkpoint(
     print(f"Loading trained model from {checkpoint_path}...")
     with open(checkpoint_path, "rb") as f:
         # NOTE: Always load on CPU and move to explicit device later
-        checkpoint = torch.load(f, map_location='cpu')
+        checkpoint = torch.load(f, map_location="cpu")
         chw_dim = checkpoint["img_dims"]
-    noise_schedule = torch.load(io.BytesIO(checkpoint["noise_schedule"]), map_location="cpu")
+    noise_schedule = pickle.loads(checkpoint["noise_schedule"])
     noise_schedule.to(device)
     model = Unet(
         dim=chw_dim[1],
