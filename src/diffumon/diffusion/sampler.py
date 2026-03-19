@@ -28,8 +28,7 @@ class Sampler(Protocol):
         seed: int,
         save_every_k_time_steps: int = -1,
         device: torch.device | None = None,
-    ) -> list[Tensor]:
-        ...
+    ) -> list[Tensor]: ...
 
 
 @dataclass
@@ -58,11 +57,20 @@ class DDPMSampler:
         samples: list[Tensor] = []
         for t in reversed(range(ns.num_timesteps)):
             t_batch = torch.full((num_samples,), t, device=x_t.device, dtype=torch.long)
+            pred_noise = model(x_t, t_batch)
+
+            # Clamp pred_x0, then recompute noise (same trick as DDIM)
+            # Not standard for DDPM, but does appear to improve generation quality significantly
+            pred_x0 = (
+                x_t - ns.sqrt_one_minus_alphas_cum_prod[t] * pred_noise
+            ) / ns.sqrt_alphas_cum_prod[t]
+            pred_x0 = pred_x0.clamp(-1.0, 1.0)
+            pred_noise = (
+                x_t - ns.sqrt_alphas_cum_prod[t] * pred_x0
+            ) / ns.sqrt_one_minus_alphas_cum_prod[t]
+
             x_t = ns.sqrt_recip_alphas[t] * (
-                x_t
-                - ns.betas[t]
-                * model(x_t, t_batch)
-                / ns.sqrt_one_minus_alphas_cum_prod[t]
+                x_t - ns.betas[t] * pred_noise / ns.sqrt_one_minus_alphas_cum_prod[t]
             )
 
             if t > 0:
@@ -139,7 +147,10 @@ class DDIMSampler:
                     (1 - alpha_prev) / (1 - alpha_t) * (1 - alpha_t / alpha_prev)
                 )
 
-                noise_dir = torch.sqrt(torch.clamp(1 - alpha_prev - sigma**2, min=0.0)) * pred_noise
+                noise_dir = (
+                    torch.sqrt(torch.clamp(1 - alpha_prev - sigma**2, min=0.0))
+                    * pred_noise
+                )
                 noise = sigma * torch.randn_like(x_t)
 
                 x_t = torch.sqrt(alpha_prev) * pred_x0 + noise_dir + noise
