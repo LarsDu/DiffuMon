@@ -41,6 +41,8 @@ Two pretrained models are provided in the `checkpoints/` directory for Fashion M
 
 This repo uses [`uv`](https://docs.astral.sh/uv/getting-started/installation) as the package/environment manager. Make sure to install it before proceeding.
 
+Pretrained checkpoints are stored in [Git LFS](https://git-lfs.com/). Install `git lfs` before cloning to ensure checkpoint files are downloaded correctly.
+
 The following command will install packages and setup a virtual environment
 
 ```bash
@@ -177,10 +179,10 @@ pre-commit install
 
 There are also example notebook(s) in the `notebooks/` directory.
 
-Make sure to install the `diffumon` kernel in Jupyter to run the notebooks.
+The `ipykernel` package is included in the `uv` dev dependencies. Install them with:
 
 ```bash
-python -m ipykernel install --user --name diffumon --display-name "Python Diffumon"
+uv sync --dev
 ```
 
 Inside notebooks you can switch samplers programmatically:
