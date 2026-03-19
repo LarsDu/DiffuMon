@@ -1,0 +1,9 @@
+defaults:
+  - sampler: ddpm
+  - _self_
+
+checkpoint_path: checkpoints/last_diffumon_checkpoint.pth
+output_dir: samples
+num_samples: 32
+seed: 1999
+device: null

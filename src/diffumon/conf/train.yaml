@@ -1,0 +1,13 @@
+data:
+  preloaded: mnist
+  data_dir: null
+  img_dim: 28
+  num_channels: 1
+  validation_size: 0.15
+
+num_epochs: 128
+batch_size: 128
+learning_rate: 1e-4
+checkpoint_path: checkpoints/last_diffumon_checkpoint.pth
+num_timesteps: 1000
+seed: 1999

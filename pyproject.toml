@@ -14,7 +14,7 @@ dependencies = [
     "numpy>=2.1.1",
     "pillow>=10.4.0",
     "pandas>=2.2.2",
-    "click>=8.1.7",
+    "hydra-core>=1.3.0",
     "tqdm>=4.66.5",
     "einops>=0.8.0",
     "py7zr>=0.22.0",
@@ -24,8 +24,8 @@ dependencies = [
 
 [project.optional-dependencies]
 cuda = [
-    "torch==2.4.1+cu121",
-    "torchvision==0.19.1+cu121",
+    "torch==2.4.1; sys_platform == 'linux'",
+    "torchvision==0.19.1; sys_platform == 'linux'",
 ]
 
 [dependency-groups]
@@ -54,8 +54,12 @@ url = "https://download.pytorch.org/whl/cu121"
 explicit = true
 
 [tool.uv.sources]
-torch = { index = "pytorch-cu121", extra = "cuda" }
-torchvision = { index = "pytorch-cu121", extra = "cuda" }
+torch = [
+    { index = "pytorch-cu121", marker = "sys_platform == 'linux'" },
+]
+torchvision = [
+    { index = "pytorch-cu121", marker = "sys_platform == 'linux'" },
+]
 
 [tool.nbqa]
 tools = ["black"]
@@ -67,7 +71,8 @@ allow-direct-references = true
 packages = ["src/diffumon"]
 
 [project.scripts]
-diffumon = 'diffumon.cli:main'
+diffumon-train = "diffumon.train_app:train_app"
+diffumon-sample = "diffumon.sample_app:sample_app"
 
 [tool.isort]
 profile = "black"

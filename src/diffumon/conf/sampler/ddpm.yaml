@@ -1,0 +1,2 @@
+type: ddpm
+save_every_k_time_steps: -1

@@ -1,13 +1,14 @@
 from dataclasses import dataclass, field
+from typing import Optional
 
-from diffumon.diffusion.sampler import SamplerType
+from omegaconf import MISSING
 
 
 @dataclass
 class SamplerConfig:
-    sampler_type: SamplerType = SamplerType.DDPM
+    type: str = MISSING
     eta: float = 0.0
-    num_inference_steps: int | None = None
+    num_inference_steps: Optional[int] = None
     save_every_k_time_steps: int = -1
 
 
@@ -17,5 +18,5 @@ class SampleConfig:
     output_dir: str = "samples"
     num_samples: int = 32
     seed: int = 1999
-    device: str | None = None
-    sampler: SamplerConfig = field(default_factory=SamplerConfig)
+    device: Optional[str] = None
+    sampler: SamplerConfig = MISSING

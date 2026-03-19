@@ -200,11 +200,11 @@ def p_sampler_to_images(
     if device is None:
         device = get_device()
 
-    sampler = _resolve_sampler(
+    sampler = create_sampler(
         sampler_type=sampler_type, eta=eta, num_inference_steps=num_inference_steps
     )
 
-    sample_batches: list[Tensor] = sampler(
+    sample_batches: list[Tensor] = sampler.sample(
         model=model,
         ns=ns,
         chw_dims=chw_dims,

@@ -1,0 +1,4 @@
+type: ddim
+eta: 0.0
+num_inference_steps: null
+save_every_k_time_steps: -1
